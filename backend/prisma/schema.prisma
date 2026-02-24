@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums baseados no DER
+enum Role {
+  teacher
+  student
+  admin
+}
+
+enum SchedulingStatus {
+  Pending
+  Confirmed
+  Canceled
+  Completed
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String    @db.VarChar(255)
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  role         Role
+  createdAt    DateTime  @default(now()) @map("created_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  // Relações
+  teacherProfile Teacher?
+  schedulings    Scheduling[]
+
+  @@map("users")
+}
+
+model Teacher {
+  id        String  @id @default(uuid())
+  userId    String  @unique @map("user_id")
+  biography String? @db.Text
+  training  String? @db.VarChar(255)
+  priceHour Decimal @map("price_hour") @db.Decimal(10, 2)
+  telephone String  @db.VarChar(20)
+
+  // Relações
+  user           User                @relation(fields: [userId], references: [id])
+  availabilities Availability[]
+  disciplines    TeacherDiscipline[]
+  schedulings    Scheduling[]
+
+  @@map("teacher")
+}
+
+model Discipline {
+  id   String @id @default(uuid())
+  name String @db.VarChar(255)
+
+  // Relações
+  teachers    TeacherDiscipline[]
+  schedulings Scheduling[]
+
+  @@map("discipline")
+}
+
+model TeacherDiscipline {
+  id           String @id @default(uuid())
+  teacherId    String @map("teacher_id")
+  disciplineId String @map("discipline_id")
+
+  teacher    Teacher    @relation(fields: [teacherId], references: [id])
+  discipline Discipline @relation(fields: [disciplineId], references: [id])
+
+  @@map("teacher_discipline")
+}
+
+model Availability {
+  id        String   @id @default(uuid())
+  teacherId String   @map("teacher_id")
+  dayWeek   Int      @map("day_week")
+  timeStart DateTime @map("time_start") @db.Time
+  timeEnd   DateTime @map("time_end") @db.Time
+
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
+  @@map("availability")
+}
+
+model Scheduling {
+  id            String           @id @default(uuid())
+  studentId     String           @map("student_id")
+  teacherId     String           @map("teacher_id")
+  disciplineId  String           @map("discipline_id")
+  dateHourStart DateTime         @map("date_hour_start")
+  dateHourEnd   DateTime         @map("date_hour_end")
+  status        SchedulingStatus @default(Pending)
+  observation   String?          @db.Text
+
+  // Relações
+  student    User       @relation(fields: [studentId], references: [id])
+  teacher    Teacher    @relation(fields: [teacherId], references: [id])
+  discipline Discipline @relation(fields: [disciplineId], references: [id])
+
+  @@map("scheduling")
+}
