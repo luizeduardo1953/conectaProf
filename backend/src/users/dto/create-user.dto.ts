@@ -16,6 +16,6 @@ export class CreateUserDto {
   @MinLength(6)
   passwordHash: string;
 
-  @IsEnum(['ADMIN', 'USER', 'STUDENT'])
+  @IsEnum(['teacher', 'student', 'admin'])
   role: string;
 }
