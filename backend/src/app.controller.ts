@@ -9,4 +9,9 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @Get('login')
+  getProfile(): string {
+    return 'Dados do perfil do usuário (protegido)';
+  }
 }
