@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
   HttpCode,
   Body,
   Param,
@@ -11,8 +10,6 @@ import {
 } from '@nestjs/common';
 import { UserPrismaRepository } from '../infra/database/UserPrismaRepository';
 import { CreateUserDto } from '../dto/create-user.dto';
-import * as bcrypt from 'bcrypt';
-import { UpdateUserDto } from '../dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -42,19 +39,12 @@ export class UsersController {
       throw new Error('Usuário com esse email já cadastrado.');
     }
 
-    if (!data.passwordHash) {
-      throw new Error('Senha não informada.');
-    }
-
-    const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(data.passwordHash, salt);
-
     const userData = {
       id: crypto.randomUUID(),
       name: data.name,
       email: data.email,
-      passwordHash,
       role: data.role,
+      firebaseUid: data.firebaseUid,
       createdAt: new Date(),
     };
 
@@ -65,32 +55,5 @@ export class UsersController {
   @Delete(':id')
   async delete(@Param('id', ParseUUIDPipe) id: string) {
     return await this.userRepository.deleteById(id);
-  }
-
-  @Put(':id')
-  async update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() data: UpdateUserDto,
-  ) {
-    const existingUser = await this.userRepository.findById(id);
-
-    if (!existingUser) {
-      throw new Error('Usuário não encontrado.');
-    }
-
-    const updatedUserData = {
-      ...existingUser, //copia os dados existentes
-      name: data.name ?? existingUser.name,
-      email: data.email ?? existingUser.email,
-      role: data.role ?? existingUser.role,
-    };
-
-    if (data.passwordHash) {
-      const salt = await bcrypt.genSalt();
-      updatedUserData.passwordHash = await bcrypt.hash(data.passwordHash, salt);
-    }
-
-    await this.userRepository.save(updatedUserData as any);
-    return updatedUserData;
   }
 }

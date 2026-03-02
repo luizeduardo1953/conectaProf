@@ -13,15 +13,15 @@ export class UserPrismaRepository implements UserRepository {
       update: {
         name: user.name,
         email: user.email,
-        passwordHash: user.passwordHash,
         role: user.role,
+        firebaseUid: user.firebaseUid,
       },
       create: {
         id: user.id,
         name: user.name,
         email: user.email,
-        passwordHash: user.passwordHash,
         role: user.role,
+        firebaseUid: user.firebaseUid ?? null,
         createdAt: user.createdAt,
       },
     });

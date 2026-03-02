@@ -3,7 +3,6 @@ export type UserRole = 'teacher' | 'student' | 'admin';
 export type CreateUserProps = {
   name: string;
   email: string;
-  passwordHash: string;
   role: UserRole;
 };
 
@@ -19,9 +18,9 @@ export class User {
     public readonly id: string,
     public name: string,
     public email: string,
-    public passwordHash: string,
     public role: UserRole,
     public createdAt: Date,
+    public firebaseUid?: string,
   ) {}
 
   static create(props: CreateUserProps) {
@@ -29,7 +28,6 @@ export class User {
       crypto.randomUUID(),
       props.name,
       props.email,
-      props.passwordHash,
       props.role,
       new Date(),
     );
