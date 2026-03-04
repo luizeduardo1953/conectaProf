@@ -3,22 +3,15 @@
 import { useState } from 'react';
 import { Mail, Lock, ArrowLeft } from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup, getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../services/firebaseConfig'; // Certifique-se que o caminho está correto
-
-const url = 'http://localhost:3000'; // Corrigido para incluir protocolo
+import { auth } from '@/services/firebaseConfig';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const redirectToDashboard = () => {
-        window.location.href = `${url}/dashboard`;
-    }
-
-    const redirectToHome = () => {
-        window.location.href = `${url}/`;
-    }
+    const router = useRouter();
 
     const loginWithEmailAndPasswordHandler = async (e: React.FormEvent) => {
         e.preventDefault(); // Previne refresh da página
@@ -29,7 +22,7 @@ export default function Login() {
             .then((userCredential) => {
                 const user = userCredential.user;
                 console.log('Usuário logado:', user);
-                redirectToDashboard();
+                router.push('/dashboard');
             })
             .catch((error) => {
                 console.error('Erro:', error.message);
@@ -43,7 +36,7 @@ export default function Login() {
         try {
             const result = await signInWithPopup(auth, provider);
             console.log('Google login:', result);
-            redirectToDashboard();
+            router.push('/dashboard');
         } catch (error) {
             console.error('Erro Google:', error);
         }
@@ -63,7 +56,7 @@ export default function Login() {
 
                 {/* --- Lado Esquerdo: Texto Promocional (Estilo Hero) --- */}
                 <div className="hidden lg:flex flex-col gap-6 pr-8">
-                    <div onClick={redirectToHome} className="flex items-center gap-2 cursor-pointer w-fit mb-4 hover:opacity-80 transition">
+                    <div onClick={() => router.push('/')} className="flex items-center gap-2 cursor-pointer w-fit mb-4 hover:opacity-80 transition">
                         <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center text-white font-bold">C</div>
                         <span className="text-xl font-bold text-slate-900">ConectaProf</span>
                     </div>
@@ -90,7 +83,7 @@ export default function Login() {
                 {/* --- Lado Direito: Card de Login --- */}
                 <div className="w-full max-w-md mx-auto">
                     {/* Botão Voltar Mobile */}
-                    <button onClick={redirectToHome} className="lg:hidden flex items-center text-slate-500 mb-6 hover:text-rose-500 transition">
+                    <button onClick={() => router.push('/')} className="lg:hidden flex items-center text-slate-500 mb-6 hover:text-rose-500 transition">
                         <ArrowLeft size={20} className="mr-2"/> Voltar
                     </button>
 

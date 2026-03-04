@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { Mail, Lock, User, GraduationCap, School, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
-
-const url = 'http://localhost:3000';
+import { useRouter } from 'next/navigation';
 
 export default function Register() {
     const [name, setName] = useState('');
@@ -14,9 +13,7 @@ export default function Register() {
     const [role, setRole] = useState<'student' | 'teacher'>('student'); // Estado para tipo de usuário
     const [loading, setLoading] = useState(false);
 
-    const redirectToDashboard = () => {
-        window.location.href = `${url}/dashboard`;
-    }
+    const router = useRouter();
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,30 +29,44 @@ export default function Register() {
                 firebaseUid: user.uid,
                 name: user.displayName || name,
                 email: user.email,
-                role, 
+                role,
             };
 
-            // 2. Envia para o Backend e AGUARDA (await) a resposta
-            // Nota: Certifique-se que o backend está rodando na porta 8000 e aceita CORS
-            const response = await fetch("http://localhost:8000/users", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData),
-            });
+            if (userData.role === 'teacher') {
+                const response = await fetch('http://localhost:8000/teachers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData),
+                });
 
-            if (!response.ok) {
-                // Se o backend falhar, lançamos erro para cair no catch
-                // Opcional: Deletar o usuário do Firebase aqui para não gerar dados órfãos
-                const errorData = await response.json(); 
-                throw new Error(errorData.message || 'Erro ao salvar no banco de dados');
+                console.log('Usuário cadastrado na tabela teacher')
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erro ao salvar no banco de dados');
+                }
+            } else {
+                // 2. Envia para o Backend e AGUARDA (await) a resposta (Apenas Alunos)
+                const response = await fetch("http://localhost:8000/users", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erro ao salvar no banco de dados');
+                }
             }
 
             console.log('Sucesso! Redirecionando...');
-            
+
             // 3. Só redireciona se tudo acima funcionou
-            redirectToDashboard();
+            router.push('/dashboard');
 
         } catch (error) {
             console.error('Erro no registro:', error);
@@ -70,7 +81,7 @@ export default function Register() {
         try {
             await signInWithPopup(auth, provider);
             // Lógica para verificar se usuário já existe ou criar novo registro no DB
-            redirectToDashboard();
+            router.push('/dashboard');
         } catch (error) {
             console.error('Erro Google:', error);
         }
