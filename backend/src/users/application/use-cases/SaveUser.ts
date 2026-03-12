@@ -1,6 +1,6 @@
-import { UserRole } from 'src/users/domain/entities/User';
 import { UserRepository } from 'src/users/domain/repositories/UserRepository';
 import { User } from '../../domain/entities/User';
+import { Role } from 'src/enums/role';
 
 export class SaveUser {
   constructor(private userRepository: UserRepository) {}
@@ -8,8 +8,9 @@ export class SaveUser {
   async execute(data: {
     name: string;
     email: string;
-    passwordHash: string;
-    role: UserRole;
+    password_hash: string;
+    role: Role;
+    avatarUrl?: string;
   }) {
     const existingUser = await this.userRepository.findByEmail(data.email);
 

@@ -9,8 +9,9 @@ CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     "email" VARCHAR(255) NOT NULL,
-    "password_hash" VARCHAR(255) NOT NULL,
+    "password" VARCHAR(255) NOT NULL,
     "role" "Role" NOT NULL,
+    "avatarUrl" VARCHAR(255),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "deleted_at" TIMESTAMP(3),
 
@@ -67,6 +68,7 @@ CREATE TABLE "scheduling" (
     "date_hour_end" TIMESTAMP(3) NOT NULL,
     "status" "SchedulingStatus" NOT NULL DEFAULT 'Pending',
     "observation" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "scheduling_pkey" PRIMARY KEY ("id")
 );

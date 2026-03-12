@@ -2,6 +2,7 @@ import { IsString } from 'class-validator';
 import { IsEmail } from 'class-validator';
 import { IsEnum } from 'class-validator';
 import { IsNotEmpty } from 'class-validator';
+import { Role } from 'src/enums/role';
 
 export class CreateUserDto {
   @IsString()
@@ -12,8 +13,9 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
-  firebaseUid: string;
+  @IsNotEmpty()
+  password: string;
 
-  @IsEnum(['teacher', 'student', 'admin'])
-  role: string;
+  @IsEnum(Role)
+  role: Role
 }

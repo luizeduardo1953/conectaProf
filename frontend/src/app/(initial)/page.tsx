@@ -28,8 +28,8 @@ export default function Initial() {
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-4">
-            <a onClick={() => router.push('/login')} className="text-sm font-medium hover:text-rose-500 cursor-pointer hidden sm:block">Entrar</a>
-            <button onClick={() => router.push('/register')} className="bg-slate-900 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-900/20">
+            <a onClick={() => router.push(`/signin`)} className="text-sm font-medium hover:text-rose-500 cursor-pointer hidden sm:block">Entrar</a>
+            <button onClick={() => router.push(`/signup`)} className="bg-slate-900 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-900/20">
               Cadastre-se
             </button>
           </div>

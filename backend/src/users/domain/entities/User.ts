@@ -1,16 +1,18 @@
-export type UserRole = 'teacher' | 'student' | 'admin';
-
+import { Role } from "src/enums/role";
 export type CreateUserProps = {
   name: string;
   email: string;
-  role: UserRole;
+  password_hash: string;
+  role: Role;
 };
 
 export type UpdateUserInput = {
   id: string;
   name?: string;
   email?: string;
-  role?: UserRole;
+  password_hash?: string;
+  role?: Role;
+  avatarUrl?: string;
 };
 
 export class User {
@@ -18,9 +20,10 @@ export class User {
     public readonly id: string,
     public name: string,
     public email: string,
-    public role: UserRole,
+    public password_hash: string,
+    public role: Role,
     public createdAt: Date,
-    public firebaseUid?: string,
+    public avatarUrl?: string,
   ) {}
 
   static create(props: CreateUserProps) {
@@ -28,6 +31,7 @@ export class User {
       crypto.randomUUID(),
       props.name,
       props.email,
+      props.password_hash,
       props.role,
       new Date(),
     );

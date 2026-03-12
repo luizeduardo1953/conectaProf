@@ -3,10 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-import { UsersController } from './users/controllers/users.controller';
 import { UserModule } from './users/user.module';
 import { TeachersModule } from './teachers/teachers.module';
-import { AgendamentoModule } from './agendamento/agendamento.module';
+import { SchedulingModule } from './scheduling/scheduling.module';
+import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/auth.guard';
 
 @Module({
   imports: [
@@ -17,9 +19,10 @@ import { AgendamentoModule } from './agendamento/agendamento.module';
     PrismaModule,
     UserModule,
     TeachersModule,
-    AgendamentoModule,
+    SchedulingModule,
+    AuthModule,
   ],
-  controllers: [AppController, UsersController],
-  providers: [AppService],
+  controllers: [AppController],
+  providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],
 })
 export class AppModule { }

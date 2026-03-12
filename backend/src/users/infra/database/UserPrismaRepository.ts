@@ -2,27 +2,34 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { UserRepository } from 'src/users/domain/repositories/UserRepository';
 import { User } from 'src/users/domain/entities/User';
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { Role } from 'src/enums/role';
 
 @Injectable()
 export class UserPrismaRepository implements UserRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async save(user: User): Promise<void> {
+    const data: Prisma.UserCreateInput = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      password_hash: user.password_hash,
+      role: user.role,
+      avatarUrl: user.avatarUrl,
+      createdAt: user.createdAt,
+    };
+
+    // upsert: cria se não existe, atualiza se já existe
     await this.prisma.user.upsert({
       where: { id: user.id },
+      create: data,
       update: {
         name: user.name,
         email: user.email,
+        password_hash: user.password_hash,
         role: user.role,
-        firebaseUid: user.firebaseUid,
-      },
-      create: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        firebaseUid: user.firebaseUid ?? null,
-        createdAt: user.createdAt,
+        avatarUrl: user.avatarUrl,
       },
     });
   }
@@ -51,5 +58,12 @@ export class UserPrismaRepository implements UserRepository {
     await this.prisma.user.delete({
       where: { id },
     });
+  }
+
+  async findAllTeachers(): Promise<User[]> {
+    const data = (await this.prisma.user.findMany({
+      where: { role: Role.Teacher },
+    })) as User[];
+    return data;
   }
 }

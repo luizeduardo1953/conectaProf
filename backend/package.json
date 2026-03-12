@@ -19,12 +19,15 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:generate": "prisma generate",
-    "docker:db": "prisma db push"
+    "docker:db": "prisma db push",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/jwt": "^11.0.2",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
@@ -34,6 +37,7 @@
     "dotenv": "^17.2.3",
     "firebase": "^12.9.0",
     "firebase-admin": "^13.6.1",
+    "jsonwebtoken": "^9.0.3",
     "nestjs-firebase": "^11.0.1",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",

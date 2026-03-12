@@ -30,6 +30,8 @@ export default function Profile() {
     const [newAvail, setNewAvail] = useState({ dayWeek: 1, timeStart: '08:00', timeEnd: '12:00' });
     const [savingSchedule, setSavingSchedule] = useState(false);
 
+    const url = process.env.NEXT_PUBLIC_URL_BACKEND;
+
     const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
     useEffect(() => {
@@ -39,7 +41,7 @@ export default function Profile() {
 
                 // Fetch the backend user to get the role
                 try {
-                    const response = await fetch(`http://localhost:8000/users/email/${currentUser.email}`);
+                    const response = await fetch(`${url}/users/email/${currentUser.email}`);
                     if (response.ok) {
                         const text = await response.text();
                         if (text) {
@@ -48,7 +50,7 @@ export default function Profile() {
 
                             if (data.role === 'teacher') {
                                 try {
-                                    const teacherRes = await fetch(`http://localhost:8000/teachers/${data.id}`);
+                                    const teacherRes = await fetch(`${url}/teachers/${data.id}`);
                                     if (teacherRes.ok) {
                                         const teacherText = await teacherRes.text();
                                         if (teacherText) {
@@ -69,7 +71,7 @@ export default function Profile() {
                 }
             } else {
                 // Not logged in, redirect to login
-                router.push('/login');
+                router.push('/signin');
             }
             setLoading(false);
         });
@@ -81,7 +83,7 @@ export default function Profile() {
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            router.push('/login');
+            router.push('/signin');
         } catch (error) {
             console.error('Error signing out:', error);
         }
@@ -91,7 +93,7 @@ export default function Profile() {
         if (!dbUser || dbUser.role !== 'teacher') return;
         setSavingSchedule(true);
         try {
-            const response = await fetch(`http://localhost:8000/teachers/${dbUser.id}/availability`, {
+            const response = await fetch(`${url}/teachers/${dbUser.id}/availability`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newAvail),

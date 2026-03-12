@@ -1,8 +1,10 @@
+import { Role } from "src/enums/role";
+
 export class CreateTeacherDto {
-    firebaseUid: string;
     name: string;
     email: string;
-    role: string;
+    password: string
+    role: Role;
     biography?: string;
     training?: string;
     priceHour?: number;

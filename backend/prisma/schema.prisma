@@ -31,8 +31,9 @@ model User {
   id           String    @id @default(uuid())
   name         String    @db.VarChar(255)
   email        String    @unique @db.VarChar(255)
+  password_hash     String    @db.VarChar(255)
   role         Role
-  firebaseUid  String?   @unique @map("firebase_uid") @db.VarChar(255)
+  avatarUrl    String?   @db.VarChar(255)
   createdAt    DateTime  @default(now()) @map("created_at")
   deletedAt    DateTime? @map("deleted_at")
 
@@ -103,6 +104,7 @@ model Scheduling {
   dateHourEnd   DateTime         @map("date_hour_end")
   status        SchedulingStatus @default(Pending)
   observation   String?          @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
 
   // Relações
   student    User       @relation(fields: [studentId], references: [id])

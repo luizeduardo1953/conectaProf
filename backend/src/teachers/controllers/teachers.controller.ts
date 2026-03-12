@@ -11,51 +11,63 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateTeacherDto } from '../dto/update-teacher.dto';
 import { CreateAvailabilityDto } from '../dto/availability.dto';
 import { CreateTeacherDto } from '../dto/createTeacher.dto';
+import { Public } from 'src/auth/decorators/public.decorator';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/enums/role';
 
 @Controller('teachers')
 export class TeachersController {
     constructor(private readonly prisma: PrismaService) { }
 
-    @Post()
-    async createTeacher(@Body() data: CreateTeacherDto) {
-        const existingUser = await this.prisma.user.findUnique({
-            where: { email: data.email }
-        });
-
-        if (existingUser) {
-            throw new Error('Usuário com email já cadastrado');
-        }
-
-        const teacher = await this.prisma.teacher.create({
-            data: {
+    @Public()
+    @Get()
+    async getAllTeachers() {
+        return this.prisma.teacher.findMany({
+            select: {
+                id: true,
+                biography: true,
+                training: true,
+                priceHour: true,
+                telephone: true,
+                availabilities: true,
                 user: {
-                    create: {
-                        email: data.email,
-                        name: data.name,
-                        role: 'teacher',
-                        firebaseUid: data.firebaseUid || null,
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        avatarUrl: true,
                     }
-                },
-                biography: data.biography,
-                training: data.training,
-                priceHour: Number(data.priceHour || 0),
-                telephone: String(data.telephone || '000000000'),
+                }
             }
         });
+    }
+
+    @Public()
+    @Get('detail/:id')
+    async getTeacherDetail(@Param('id', ParseUUIDPipe) id: string) {
+        const teacher = await this.prisma.teacher.findUnique({
+            where: { id },
+            include: {
+                user: true,
+                availabilities: true,
+                disciplines: {
+                    include: {
+                        discipline: true,
+                    }
+                }
+            }
+        });
+
+        if (!teacher) {
+            throw new Error('Professor não encontrado');
+        }
 
         return teacher;
     }
 
-    @Get()
-    async getAllTeachers() {
-        return this.prisma.teacher.findMany({
-            include: {
-                user: true,
-                availabilities: true
-            }
-        });
-    }
 
+    @Roles(Role.Teacher)
     @Get(':userId')
     async getProfile(@Param('userId', ParseUUIDPipe) userId: string) {
         let teacher = await this.prisma.teacher.findUnique({
@@ -68,6 +80,7 @@ export class TeachersController {
         return teacher;
     }
 
+    @Roles(Role.Teacher)
     @Put(':userId')
     async upsertProfile(
         @Param('userId', ParseUUIDPipe) userId: string,
@@ -92,6 +105,7 @@ export class TeachersController {
         return teacher;
     }
 
+    @Roles(Role.Teacher)
     @Post(':userId/availability')
     async createAvailability(
         @Param('userId', ParseUUIDPipe) userId: string,

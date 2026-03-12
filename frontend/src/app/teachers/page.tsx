@@ -139,11 +139,17 @@ export default function TeachersList() {
                                         <p className="text-sm text-slate-400 italic">Professor não possui horários cadastrados.</p>
                                     )}
                                 </div>
-                                <div className="flex flex-col justify-center">
+                                <div className="flex flex-col justify-center gap-3">
+                                    <button
+                                        onClick={() => router.push(`/teachers/${teacher.id}`)}
+                                        className="w-full md:w-auto mt-4 md:mt-0 whitespace-nowrap bg-white border border-rose-500 hover:bg-rose-50 text-rose-500 font-bold py-3 px-6 rounded-xl transition"
+                                    >
+                                        Ver Perfil
+                                    </button>
                                     <button
                                         onClick={() => handleBookClass(teacher.id, '')}
                                         disabled={!teacher.availabilities || teacher.availabilities.length === 0}
-                                        className="w-full md:w-auto mt-4 md:mt-0 whitespace-nowrap bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full md:w-auto whitespace-nowrap bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Agendar Aula
                                     </button>

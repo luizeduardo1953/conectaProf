@@ -3,122 +3,75 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    User, LogOut, Calendar, BookOpen, Search, MapPin,
-    Calculator, Globe, Code, Music, Palette, Dumbbell,
-    GraduationCap, Clock, MonitorPlay
+    User, LogOut, Calendar, BookOpen, Search, MapPin, Clock, MonitorPlay
 } from 'lucide-react';
-import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/services/firebaseConfig';
 
-// Helper function to guess subject icon based on keywords
-const getSubjectIcon = (text: string) => {
-    const t = (text || '').toLowerCase();
-    if (t.includes('matemática') || t.includes('math') || t.includes('física') || t.includes('cálculo')) return <Calculator size={20} className="text-blue-500" />;
-    if (t.includes('inglês') || t.includes('espanhol') || t.includes('idioma') || t.includes('geografia')) return <Globe size={20} className="text-emerald-500" />;
-    if (t.includes('programação') || t.includes('computação') || t.includes('software')) return <Code size={20} className="text-indigo-500" />;
-    if (t.includes('música') || t.includes('piano') || t.includes('violão')) return <Music size={20} className="text-purple-500" />;
-    if (t.includes('arte') || t.includes('desenho') || t.includes('pintura')) return <Palette size={20} className="text-pink-500" />;
-    if (t.includes('educação física') || t.includes('treino') || t.includes('esporte')) return <Dumbbell size={20} className="text-orange-500" />;
-    return <GraduationCap size={20} className="text-rose-500" />;
-};
 
 export default function Dashboard() {
     const router = useRouter();
     const [dbUser, setDbUser] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
     const [teachers, setTeachers] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [locationQuery, setLocationQuery] = useState('');
 
+    const url = process.env.NEXT_PUBLIC_URL_BACKEND;
+
     const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            if (currentUser) {
-                try {
-                    // Fetch user info
-                    const response = await fetch(`http://localhost:8000/users/email/${currentUser.email}`);
-                    if (response.ok) {
-                        const text = await response.text();
-                        if (text) {
-                            const data = JSON.parse(text);
-                            setDbUser(data);
-                        }
-                    }
-
-                    // Fetch all teachers
-                    const resTeachers = await fetch('http://localhost:8000/teachers');
-                    if (resTeachers.ok) {
-                        const dataTeachers = await resTeachers.json();
-                        setTeachers(dataTeachers);
-                    }
-                } catch (error) {
-                    console.error('Error fetching data:', error);
-                }
-            } else {
-                router.push('/login');
-            }
-            setLoading(false);
+    const getMe = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            router.push('/signin');
+            return;
+        }
+        const response = await fetch(`${url}/users/me`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         });
 
-        return () => unsubscribe();
-    }, [router]);
-
-    const handleLogout = async () => {
-        try {
-            await signOut(auth);
-            router.push('/login');
-        } catch (error) {
-            console.error('Error signing out:', error);
+        if (!response.ok) {
+            router.push('/signin');
+            return;
         }
-    };
 
-    const handleBookClass = async (teacherId: string) => {
-        if (!dbUser) return;
-        try {
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-
-            const response = await fetch('http://localhost:8000/agendamentos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    studentId: dbUser.id,
-                    teacherId: teacherId,
-                    disciplineId: "placeholder-base-id",
-                    dateHourStart: tomorrow.toISOString(),
-                    dateHourEnd: tomorrow.toISOString(),
-                    observation: "Aula agendada pelo sistema."
-                })
-            });
-
-            if (response.ok) {
-                alert('Aula agendada com sucesso!');
-            } else {
-                alert('Erro ao agendar a aula. Verifique os dados no backend.');
-            }
-        } catch (error) {
-            console.error('Error booking class:', error);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin"></div>
-            </div>
-        );
+        const data = await response.json();
+        setDbUser(data);
     }
 
-    // Filter teachers mostly visually (ignoring location for now as per user request to just have the field)
-    const filteredTeachers = teachers.filter(t => {
-        const teacherName = t.user?.name?.toLowerCase() || '';
-        const teacherBio = t.biography?.toLowerCase() || '';
-        const searchLower = searchQuery.toLowerCase();
+    const getTeachers = async () => {
 
-        return teacherName.includes(searchLower) || teacherBio.includes(searchLower);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            router.push('/signin');
+            return;
+        }
+        const response = await fetch(`${url}/users/teachers`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            router.push('/signin');
+            return;
+        }
+
+        const data = await response.json();
+        setTeachers(data);
+    }
+
+    const filteredTeachers = teachers.filter((teacher) => {
+        const matchesSearch = teacher.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesLocation = teacher.city.toLowerCase().includes(locationQuery.toLowerCase());
+        return matchesSearch && matchesLocation;
     });
+
+    useEffect(() => {
+        getMe();
+        getTeachers();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col p-4 sm:p-8 relative overflow-hidden">
@@ -144,7 +97,7 @@ export default function Dashboard() {
                         Meu Perfil
                     </button>
                     <button
-                        onClick={handleLogout}
+                        onClick={() => router.push('/signin')}
                         className="flex-1 sm:flex-none flex justify-center items-center gap-2 rounded-xl border border-gray-200 bg-white py-2.5 px-4 font-bold text-rose-500 hover:bg-rose-50 hover:border-rose-200 transition active:scale-[0.98]"
                     >
                         <LogOut size={18} /> Sair
@@ -230,7 +183,7 @@ export default function Dashboard() {
                                                     <h3 className="font-bold text-lg text-slate-900">{teacher.user?.name || 'Professor(a)'}</h3>
                                                     <div className="flex items-center gap-2 mt-1">
                                                         <div className="p-1.5 bg-slate-50 rounded-lg">
-                                                            {getSubjectIcon(teacher.biography + ' ' + teacher.training)}
+                                                            {"getSubjectIcon(teacher.biography + ' ' + teacher.training)"}
                                                         </div>
                                                         <span className="text-sm text-slate-500 font-medium truncate max-w-[150px]">
                                                             {teacher.training || 'Diversas Matérias'}
@@ -285,7 +238,7 @@ export default function Dashboard() {
 
                                             {/* Action Button */}
                                             <button
-                                                onClick={() => handleBookClass(teacher.id)}
+                                                onClick={() => "handleBookClass(teacher.id)"}
                                                 disabled={!teacher.availabilities || teacher.availabilities.length === 0}
                                                 className="w-full mt-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed group-hover:bg-rose-500 flex justify-center items-center gap-2"
                                             >

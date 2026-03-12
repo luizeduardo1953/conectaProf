@@ -1,6 +1,7 @@
 import { IsOptional, IsString } from 'class-validator';
 import { IsEmail } from 'class-validator';
 import { IsEnum } from 'class-validator';
+import { Role } from 'src/enums/role';
 
 export class UpdateUserDto {
   @IsString()
@@ -15,7 +16,11 @@ export class UpdateUserDto {
   @IsOptional()
   passwordHash?: string;
 
-  @IsEnum(['teacher', 'student', 'admin'])
+  @IsEnum(Role)
   @IsOptional()
-  role?: string;
+  role?: Role;
+
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string;
 }
