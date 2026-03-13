@@ -4,9 +4,9 @@ import { DisciplinePrismaRepository } from "../infra/DisciplinePrismaRepository"
 import { CreateDisciplineDto } from "../dto/create-discipline.dto";
 import { UpdateDisciplineDto } from "../dto/update-discipline.dto";
 import { Roles } from "src/auth/decorators/roles.decorator";
+import { Role } from "src/enums/role";
 
 import { Post, Get, Put, Delete, Param } from "@nestjs/common";
-import { Role } from "src/enums/role";
 
 @Controller('discipline')
 export class DisciplineController {
