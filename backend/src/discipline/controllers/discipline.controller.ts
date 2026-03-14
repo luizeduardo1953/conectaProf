@@ -12,6 +12,7 @@ import { Post, Get, Put, Delete, Param } from "@nestjs/common";
 export class DisciplineController {
     constructor(private readonly disciplineRepository: DisciplinePrismaRepository) {}
 
+    @Roles(Role.Admin)
     @HttpCode(201)
     @Post()
     async create(@Body() data: CreateDisciplineDto): Promise<Discipline> {

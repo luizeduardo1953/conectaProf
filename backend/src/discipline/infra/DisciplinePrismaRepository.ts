@@ -1,9 +1,11 @@
-import { PrismaClient } from "@prisma/client";
 import { DisciplineRepository } from "src/discipline/domain/repositories/DisciplineRepository";
 import { Discipline } from "src/discipline/domain/entities/Discipline";
+import { PrismaService } from "src/prisma/prisma.service";
+import { Injectable } from "@nestjs/common";
 
+@Injectable()
 export class DisciplinePrismaRepository implements DisciplineRepository {
-    constructor(private readonly prisma: PrismaClient) {}
+    constructor(private readonly prisma: PrismaService) {}
 
     async create(name: string): Promise<Discipline> {
         return this.prisma.discipline.create({

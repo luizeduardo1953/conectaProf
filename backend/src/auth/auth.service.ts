@@ -1,10 +1,10 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserPrismaRepository } from 'src/users/infra/database/UserPrismaRepository';
 import { User } from 'src/users/domain/entities/User';
-import { AuthResponseDto } from './auth.dto';
-import { Role } from 'src/enums/role';
+import { SignInResponseDto, SignUpRequestDto, SignUpResponseDto, SignInRequestDto } from './auth.dto';
 import * as bcrypt from 'bcrypt';
+
 
 
 @Injectable()
@@ -14,47 +14,58 @@ export class AuthService {
         private readonly userPrismaRepository: UserPrismaRepository,
     ) {}
 
-  async signIn(email: string, pass: string): Promise<AuthResponseDto> {
-  const user = await this.userPrismaRepository.findByEmail(email);
+  async signIn(data: SignInRequestDto): Promise<SignInResponseDto> {
 
-  const invalid = new UnauthorizedException('E-mail ou senha incorretos.');
+    if(data.password.length < 8 || data.password.length > 20) {
+      throw new BadRequestException('A senha deve ter entre 8 e 20 caracteres.');
+    }
+      
+    const user = await this.userPrismaRepository.findByEmail(data.email);
 
-  if (!user) throw invalid;
+    const invalid = new UnauthorizedException('E-mail ou senha incorretos.');
 
-  const passwordMatch = await bcrypt.compare(pass, user.password_hash);
+    if (!user) throw invalid;
 
-  if (!passwordMatch) throw invalid;
+    const passwordMatch = await bcrypt.compare(data.password, user.password_hash);
 
-  const payload = {
-    sub: user.id,
-    username: user.name,
-    email: user.email,
-    role: user.role,
-  };
+    if (!passwordMatch) throw invalid;
 
-  return {
-    token: await this.jwtService.signAsync(payload),
-    expireIn: '50min',
-  };
+    const payload = {
+      sub: user.id,
+      username: user.name,
+      email: user.email,
+      role: user.role,
+    };
+
+    return {
+      token: await this.jwtService.signAsync(payload, { expiresIn: '50m' }),
+      expiresIn: '50min',
+    };
 }
 
-  async signUp(name: string, email: string, password: string, role: Role): Promise<AuthResponseDto> {
-    const existing = await this.userPrismaRepository.findByEmail(email);
+  async signUp(data: SignUpRequestDto): Promise<SignUpResponseDto> {
+
+    const existing = await this.userPrismaRepository.findByEmail(data.email);
+
     if (existing) {
       throw new ConflictException('Já existe uma conta com este e-mail.');
     }
 
-      const password_hash = await bcrypt.hash(password, 10);
+    if(data.password_hash.length < 8 || data.password_hash.length > 20) {
+      throw new BadRequestException('A senha deve ter entre 8 e 20 caracteres.');
+    }
 
-    const newUser = User.create({ name, email, password_hash, role });
+    const password_hash = await bcrypt.hash(data.password_hash, 10);
+
+    const newUser = User.create({ name: data.name, email: data.email, password_hash, role: data.role });
 
     await this.userPrismaRepository.save(newUser);
-
-    const payload = { sub: newUser.id, username: newUser.name, email: newUser.email, password_hash: newUser.password_hash, role: newUser.role };
     
     return {
-      token: await this.jwtService.signAsync(payload),
-      expireIn: '50min',
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
     };
   }
     

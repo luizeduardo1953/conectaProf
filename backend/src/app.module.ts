@@ -9,6 +9,7 @@ import { SchedulingModule } from './scheduling/scheduling.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
+import { DisciplineModule } from './discipline/discipline.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthGuard } from './auth/auth.guard';
     PrismaModule,
     UserModule,
     TeachersModule,
+    DisciplineModule,
     SchedulingModule,
     AuthModule,
   ],

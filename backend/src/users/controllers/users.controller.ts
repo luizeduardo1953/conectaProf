@@ -43,29 +43,6 @@ export class UsersController {
     return await this.userRepository.findByEmail(email);
   }
 
-  @Public()
-  @Post()
-  @HttpCode(201)
-  async create(@Body() data: CreateUserDto) {
-    const existingUser = await this.userRepository.findByEmail(data.email);
-
-    if (existingUser) {
-      throw new Error('Usuário com esse email já cadastrado.');
-    }
-
-    const userData = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      role: data.role,
-      createdAt: new Date(),
-    };
-
-    await this.userRepository.save(userData as any);
-    return userData;
-  }
-
   @Roles(Role.Admin)
   @Delete(':id')
   async delete(@Param('id', ParseUUIDPipe) id: string) {
