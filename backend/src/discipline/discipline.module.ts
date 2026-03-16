@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DisciplinePrismaRepository } from './infra/DisciplinePrismaRepository';
+import { DisciplinePrismaRepository } from './infra/database/DisciplinePrismaRepository';
 import { DisciplineController } from './controllers/discipline.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -13,4 +13,4 @@ import { PrismaService } from 'src/prisma/prisma.service';
   ],
   exports: [DisciplinePrismaRepository],
 })
-export class DisciplineModule {}
+export class DisciplineModule { }

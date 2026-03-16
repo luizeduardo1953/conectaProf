@@ -49,7 +49,7 @@ model Teacher {
   userId    String  @unique @map("user_id")
   biography String? @db.Text
   training  String? @db.VarChar(255)
-  priceHour Decimal @map("price_hour") @db.Decimal(10, 2)
+  priceHour Float? @map("price_hour")
   telephone String  @db.VarChar(20)
 
   // Relações

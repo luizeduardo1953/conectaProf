@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus } from "@nestjs/common";
 import { Discipline } from "../domain/entities/Discipline";
-import { DisciplinePrismaRepository } from "../infra/DisciplinePrismaRepository";
+import { DisciplinePrismaRepository } from "../infra/database/DisciplinePrismaRepository";
 import { CreateDisciplineDto } from "../dto/create-discipline.dto";
 import { UpdateDisciplineDto } from "../dto/update-discipline.dto";
 import { Roles } from "src/auth/decorators/roles.decorator";
@@ -10,7 +10,7 @@ import { Post, Get, Put, Delete, Param } from "@nestjs/common";
 
 @Controller('discipline')
 export class DisciplineController {
-    constructor(private readonly disciplineRepository: DisciplinePrismaRepository) {}
+    constructor(private readonly disciplineRepository: DisciplinePrismaRepository) { }
 
     @Roles(Role.Admin)
     @HttpCode(201)
