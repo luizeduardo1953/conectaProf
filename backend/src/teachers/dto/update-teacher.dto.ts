@@ -1,6 +1,21 @@
+import { IsString, IsNumber, IsPositive, IsOptional } from 'class-validator';
+
 export class UpdateTeacherDto {
-    biography?: string;
-    training?: string;
-    priceHour?: number;
-    telephone?: string;
+  @IsString()
+  @IsOptional()
+  biography?: string;
+
+  @IsString()
+  @IsOptional()
+  training?: string;
+
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  priceHour?: number;
+
+  @IsString()
+  @IsOptional()
+  telephone?: string;
 }
+

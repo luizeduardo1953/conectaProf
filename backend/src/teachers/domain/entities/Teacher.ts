@@ -8,6 +8,13 @@ export type CreateTeacherProps = {
   telephone?: string | null;
 }
 
+export type UpdateTeacherInput = {
+  biography?: string | null;
+  training?: string | null;
+  priceHour?: number | null;
+  telephone?: string | null;
+}
+
 export class Teacher {
   public readonly id: string;
   public userId: string;
@@ -19,13 +26,13 @@ export class Teacher {
   constructor(id: string, props: CreateTeacherProps) {
     this.id = id;
     this.userId = props.userId;
-    this.biography = props.biography;
-    this.training = props.training;
-    this.priceHour = props.priceHour;
-    this.telephone = props.telephone;
+    this.biography = props.biography ?? null;
+    this.training = props.training ?? null;
+    this.priceHour = props.priceHour ?? 0;
+    this.telephone = props.telephone ?? '';
   }
 
   static create(props: CreateTeacherProps): Teacher {
     return new Teacher(randomUUID(), props);
   }
-}
+}

@@ -1,10 +1,12 @@
-import { TeacherRepository } from "src/teachers/domain/repositories/TeacherRepository";
-import { Teacher } from "src/teachers/domain/entities/Teacher";
+import { Injectable } from '@nestjs/common';
+import { Teacher } from 'src/teachers/domain/entities/Teacher';
+import { TeacherPrismaRepository } from 'src/teachers/infra/database/TeacherPrismaRepository';
 
-export class GetAllTeachers {
-    constructor(private teacherRepository: TeacherRepository) {}
+@Injectable()
+export class GetAllTeachersUseCase {
+  constructor(private readonly teacherRepository: TeacherPrismaRepository) {}
 
-    async execute(): Promise<Teacher[]> {
-        return this.teacherRepository.getAll();
-    }
-}   
+  async execute(): Promise<Teacher[]> {
+    return this.teacherRepository.getAll();
+  }
+}

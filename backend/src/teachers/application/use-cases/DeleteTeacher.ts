@@ -1,9 +1,13 @@
-import { TeacherRepository } from "src/teachers/domain/repositories/TeacherRepository";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { TeacherPrismaRepository } from 'src/teachers/infra/database/TeacherPrismaRepository';
 
-export class DeleteTeacher {
-    constructor(private teacherRepository: TeacherRepository) {}
+@Injectable()
+export class DeleteTeacherUseCase {
+  constructor(private readonly teacherRepository: TeacherPrismaRepository) {}
 
-    async execute(id: string): Promise<void> {
-        await this.teacherRepository.delete(id);
-    }
+  async execute(id: string): Promise<void> {
+    const teacher = await this.teacherRepository.findById(id);
+    if (!teacher) throw new NotFoundException('Professor não encontrado');
+    await this.teacherRepository.delete(id);
+  }
 }

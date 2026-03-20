@@ -1,50 +1,39 @@
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { TeacherRepository } from 'src/teachers/domain/repositories/TeacherRepository';
-import { Teacher } from 'src/teachers/domain/entities/Teacher';
-import { UpdateTeacherDto } from 'src/teachers/dto/update-teacher.dto';
+import { UpdateTeacherInput, Teacher } from 'src/teachers/domain/entities/Teacher';
 
 @Injectable()
 export class TeacherPrismaRepository implements TeacherRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-async create(teacher: Teacher): Promise<Teacher> {
+  async create(teacher: Teacher): Promise<Teacher> {
+    const data = await this.prisma.teacher.create({
+      data: {
+        id: teacher.id,
+        userId: teacher.userId,
+        biography: teacher.biography ?? '',
+        training: teacher.training ?? '',
+        priceHour: teacher.priceHour ?? 0,
+        telephone: teacher.telephone ?? '',
+      },
+    });
 
-    if(!teacher.telephone){
-        teacher.telephone = "";
-    }
+    return new Teacher(data.id, {
+      userId: data.userId,
+      biography: data.biography,
+      training: data.training,
+      priceHour: data.priceHour ? Number(data.priceHour) : null,
+      telephone: data.telephone,
+    });
+  }
 
-    if(!teacher.priceHour){
-        teacher.priceHour = 0;
-    }
-
-  const data = await this.prisma.teacher.create({
-    data: {
-      id: teacher.id,
-      userId: teacher.userId,
-      biography: teacher.biography,
-      training: teacher.training,
-      priceHour: teacher.priceHour,
-      telephone: teacher.telephone,
-    },
-  });
-
-  return new Teacher(
-    data.id, {
-    userId: data.userId,
-    biography: data.biography,
-    training: data.training,
-    priceHour: data.priceHour ? Number(data.priceHour) : null,
-    telephone: data.telephone,
-  });
-}
-
-  async findById(id: string): Promise<Teacher | null> {
+  async findById(id: string): Promise<Teacher> {
     const data = await this.prisma.teacher.findUnique({
       where: { id },
     });
 
-    if (!data) return null;
+    if (!data) throw new NotFoundException('Professor não encontrado');
 
     return new Teacher(data.id, {
       userId: data.userId,
@@ -76,23 +65,23 @@ async create(teacher: Teacher): Promise<Teacher> {
     });
   }
 
-  async update(id: string, teacher: UpdateTeacherDto): Promise<Teacher> {
-    const data = await this.prisma.teacher.update({
+  async update(id: string, data: UpdateTeacherInput): Promise<Teacher> {
+    const updated = await this.prisma.teacher.update({
       where: { id },
       data: {
-        biography: teacher.biography,
-        training: teacher.training,
-        priceHour: teacher.priceHour,
-        telephone: teacher.telephone,
+        biography: data.biography ?? undefined,
+        training: data.training ?? undefined,
+        priceHour: data.priceHour ?? undefined,
+        telephone: data.telephone ?? undefined,
       },
     });
 
-    return new Teacher(data.id, {
-      userId: data.userId,
-      biography: data.biography,
-      training: data.training,
-      priceHour: data.priceHour ? Number(data.priceHour) : null,
-      telephone: data.telephone,
+    return new Teacher(updated.id, {
+      userId: updated.userId,
+      biography: updated.biography,
+      training: updated.training,
+      priceHour: updated.priceHour ? Number(updated.priceHour) : null,
+      telephone: updated.telephone,
     });
   }
 }

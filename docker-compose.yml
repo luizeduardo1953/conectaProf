@@ -13,8 +13,12 @@ services:
       - ./backend:/app
       - /app/node_modules
     depends_on:
-      - postgres
-    command: npm run start:dev
+      postgres:
+        condition: service_healthy
+    command: sh -c "npx prisma migrate deploy && npm run start:dev"
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=6144
+    mem_limit: 8192m
 
   postgres:
     image: postgres:16-alpine
@@ -27,7 +31,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -41,6 +45,8 @@ services:
       - /app/node_modules
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_OPTIONS=--max-old-space-size=1024
+    mem_limit: 1280m
     depends_on:
       - backend
 

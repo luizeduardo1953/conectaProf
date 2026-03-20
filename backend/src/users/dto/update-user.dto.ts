@@ -14,7 +14,7 @@ export class UpdateUserDto {
 
   @IsString()
   @IsOptional()
-  passwordHash?: string;
+  password?: string;
 
   @IsEnum(Role)
   @IsOptional()

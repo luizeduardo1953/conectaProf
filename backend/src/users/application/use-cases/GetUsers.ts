@@ -1,15 +1,12 @@
-import { UserRepository } from 'src/users/domain/repositories/UserRepository';
+import { Injectable } from '@nestjs/common';
+import { UserPrismaRepository } from 'src/users/infra/database/UserPrismaRepository';
 
+@Injectable()
 export class GetUsers {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private readonly userRepository: UserPrismaRepository) {}
 
   async execute() {
     const users = await this.userRepository.findAll();
-
-    if (!users || users.length === 0) {
-      return [];
-    }
-
-    return users;
+    return users ?? [];
   }
 }
