@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
 import { DisciplineModule } from './discipline/discipline.module';
+import { AvailabilityModule } from './availability/availability.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { DisciplineModule } from './discipline/discipline.module';
     TeachersModule,
     DisciplineModule,
     SchedulingModule,
+    AvailabilityModule,
     AuthModule,
   ],
   controllers: [AppController],
