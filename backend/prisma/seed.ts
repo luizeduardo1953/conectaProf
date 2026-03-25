@@ -2,6 +2,7 @@ import "dotenv/config";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const connectionString = `${process.env.DATABASE_URL}`;
 const pool = new Pool({ connectionString });
@@ -9,13 +10,17 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 async function main() {
 
+  const password_hash_admin = await bcrypt.hash("admin123456", 10);
+  const password_hash_student = await bcrypt.hash("student123456", 10);
+  const password_hash_teacher = await bcrypt.hash("teacher123456", 10);
+
   const admin = await prisma.user.upsert({
     where: { email: "admin@admin.com" },
     update: {},
     create: {
       name: "Admin",
       email: "admin@admin.com",
-      password_hash: "admin123456",
+      password_hash: password_hash_admin,
       role: "admin"
     },
   });
@@ -25,7 +30,7 @@ async function main() {
     create: {
       email: "student@student.com",
       name: "Student",
-      password_hash: "student123456",
+      password_hash: password_hash_student,
       role: "student",
     },
   });
@@ -35,7 +40,7 @@ async function main() {
     create: {
       email: "teacher@teacher.com",
       name: "Teacher",
-      password_hash: "teacher123456",
+      password_hash: password_hash_teacher,
       role: "teacher",
     },
   });

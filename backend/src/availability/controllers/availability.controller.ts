@@ -19,7 +19,7 @@ export class AvailabilityController {
         private readonly findAllAvailability: FindAllAvailabilityUseCase,
     ) { }
 
-    @Roles(Role.Admin)
+    @Roles(Role.Student)
     @Post()
     async execute(@Body() data: CreateAvailabilityDto){
         return await this.createAvailability.execute(data);

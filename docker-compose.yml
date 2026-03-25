@@ -18,7 +18,7 @@ services:
       postgres:
         condition: service_healthy
     # command: sh -c "npx prisma migrate deploy && npm run start:dev"
-    command: sh -c "npx prisma migrate deploy && npx prisma db seed && node dist/main.js"
+    command: sh -c "npx prisma db push && npx prisma db seed && node dist/main.js"
     environment:
       - NODE_OPTIONS=--max-old-space-size=6144
       - DATABASE_URL=postgresql://postgres:Pirapora123%2F@postgres:5432/conectaprof?schema=public
