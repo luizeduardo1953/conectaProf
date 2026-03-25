@@ -7,6 +7,10 @@ export class GetUsers {
 
   async execute() {
     const users = await this.userRepository.findAll();
-    return users ?? [];
+
+    if(!users) {
+      throw new Error('Nenhum usuário encontrado.');
+    }
+    return users;
   }
 }

@@ -12,4 +12,7 @@ COPY . .
 # Gera o client do Prisma
 RUN npx prisma generate
 
-EXPOSE 3000
+# ← faltava essa linha
+RUN npm run build
+
+EXPOSE 8000

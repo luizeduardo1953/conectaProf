@@ -12,12 +12,16 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - /app/dist          # ← adiciona essa linha para proteger o dist
+
     depends_on:
       postgres:
         condition: service_healthy
-    command: sh -c "npx prisma migrate deploy && npm run start:dev"
+    # command: sh -c "npx prisma migrate deploy && npm run start:dev"
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed && node dist/main.js"
     environment:
       - NODE_OPTIONS=--max-old-space-size=6144
+      - DATABASE_URL=postgresql://postgres:Pirapora123%2F@postgres:5432/conectaprof?schema=public
     mem_limit: 8192m
 
   postgres:
