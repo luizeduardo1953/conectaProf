@@ -19,31 +19,31 @@ export class AvailabilityController {
         private readonly findAllAvailability: FindAllAvailabilityUseCase,
     ) { }
 
-    @Roles(Role.Student)
+    @Roles(Role.Teacher, Role.Admin)
     @Post()
-    async execute(@Body() data: CreateAvailabilityDto){
+    async create(@Body() data: CreateAvailabilityDto){
         return await this.createAvailability.execute(data);
     }
 
-    @Roles(Role.Student)
+    @Roles(Role.Teacher, Role.Admin)
     @Put(':id')
     async update(@Param('id') id: string, @Body() data: UpdateAvailabilityDto){
         return await this.updateAvailability.execute(id, data.dayOfWeek, data.startTime, data.endTime, data.teacherId);
     }
 
-    @Roles(Role.Student)
+    @Roles(Role.Teacher, Role.Admin)
     @Delete(':id')
     async delete(@Param('id') id: string){
         return await this.deleteAvailability.execute(id);
     }
 
-    @Roles(Role.Admin)
+    @Roles(Role.Teacher, Role.Admin)
     @Get(':id')
     async findById(@Param('id') id: string){
         return await this.findAvailabilityById.execute(id);
     }
 
-    @Roles(Role.Admin)
+    @Roles(Role.Teacher, Role.Admin)
     @Get()
     async findAll(){
         return await this.findAllAvailability.execute();

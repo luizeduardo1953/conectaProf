@@ -6,22 +6,19 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     env_file:
-      - ./backend/.env
+      - ./backend/.env.docker
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
       - /app/node_modules
-      - /app/dist          # ← adiciona essa linha para proteger o dist
 
     depends_on:
       postgres:
         condition: service_healthy
-    # command: sh -c "npx prisma migrate deploy && npm run start:dev"
-    command: sh -c "npx prisma db push && npx prisma db seed && node dist/main.js"
+    command: sh -c "npm run build && npx prisma db push && node dist/main.js"
     environment:
-      - NODE_OPTIONS=--max-old-space-size=6144
-      - DATABASE_URL=postgresql://postgres:Pirapora123%2F@postgres:5432/conectaprof?schema=public
+      NODE_OPTIONS: "--max-old-space-size=6144"
     mem_limit: 8192m
 
   postgres:
@@ -40,19 +37,19 @@ services:
       timeout: 5s
       retries: 5
 
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
-      - NODE_OPTIONS=--max-old-space-size=1024
-    mem_limit: 1280m
-    depends_on:
-      - backend
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   environment:
+  #     - NEXT_PUBLIC_API_URL=http://localhost:8000
+  #     - NODE_OPTIONS=--max-old-space-size=1024
+  #   mem_limit: 1280m
+  #   depends_on:
+  #     - backend
 
 volumes:
   postgres_data:
