@@ -1,49 +1,6 @@
-'use client';
-
-import { useState } from 'react';
-import { Mail, Lock, ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import {ArrowLeft } from 'lucide-react';
 
 export default function Signin() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    const router = useRouter();
-
-    const handleSignIn = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-
-        try{
-            const url = process.env.NEXT_PUBLIC_URL_BACKEND;
-            const response = await fetch(`${url}/auth/signin`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }, body: JSON.stringify({ email, password }),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                alert(error.message || 'Erro no login');
-
-                return;
-            }
-
-            const data = await response.json();
-
-            localStorage.setItem('token', data.token);
-
-            router.push('/dashboard');
-
-        } catch(error) {
-            alert('Erro na conexão');
-        }finally {
-            setLoading(false);
-        }
-    };
-
     return (
         <div className="min-h-screen w-full bg-gray-50 font-sans text-slate-800 flex items-center justify-center p-4 relative overflow-hidden">
             
@@ -58,7 +15,7 @@ export default function Signin() {
 
                 {/* --- Lado Esquerdo: Texto Promocional (Estilo Hero) --- */}
                 <div className="hidden lg:flex flex-col gap-6 pr-8">
-                    <div onClick={() => router.push('/')} className="flex items-center gap-2 cursor-pointer w-fit mb-4 hover:opacity-80 transition">
+                    <div className="flex items-center gap-2 cursor-pointer w-fit mb-4 hover:opacity-80 transition">
                         <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center text-white font-bold">C</div>
                         <span className="text-xl font-bold text-slate-900">ConectaProf</span>
                     </div>
@@ -85,7 +42,7 @@ export default function Signin() {
                 {/* --- Lado Direito: Card de Login --- */}
                 <div className="w-full max-w-md mx-auto">
                     {/* Botão Voltar Mobile */}
-                    <button onClick={() => router.push('/')} className="lg:hidden flex items-center text-slate-500 mb-6 hover:text-rose-500 transition">
+                    <button className="lg:hidden flex items-center text-slate-500 mb-6 hover:text-rose-500 transition">
                         <ArrowLeft size={20} className="mr-2"/> Voltar
                     </button>
 
@@ -95,52 +52,7 @@ export default function Signin() {
                             <p className="text-slate-500 text-sm mt-2">Insira seus dados para acessar a plataforma.</p>
                         </div>
 
-                        <form onSubmit={handleSignIn} className="flex flex-col gap-5">
-                            {/* Input Email */}
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                                    <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-rose-500 transition" />
-                                </div>
-                                <input 
-                                    type="email" 
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Seu e-mail" 
-                                    className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3.5 pl-11 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition font-medium placeholder-slate-400" 
-                                    required
-                                />
-                            </div>
-
-                            {/* Input Senha */}
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                                    <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-rose-500 transition" />
-                                </div>
-                                <input 
-                                    type="password" 
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Sua senha" 
-                                    className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3.5 pl-11 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition font-medium placeholder-slate-400" 
-                                    required
-                                />
-                            </div>
-
-                            <div className="flex justify-end">
-                                <a href="#" className="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline">
-                                    Esqueceu a senha?
-                                </a>
-                            </div>
-
-                            {/* Botão Principal */}
-                            <button 
-                                type="submit" 
-                                disabled={loading}
-                                className="w-full rounded-xl bg-rose-500 py-3.5 font-bold text-white shadow-lg shadow-rose-500/30 transition hover:bg-rose-600 hover:shadow-rose-500/40 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-                            >
-                                {loading ? 'Entrando...' : 'Entrar na conta'}
-                            </button>
-                        </form>
+                        <Signin />
 
                         {/* Divisor */}
                         <div className="relative my-8">

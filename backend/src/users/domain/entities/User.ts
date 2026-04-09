@@ -1,4 +1,5 @@
 import { Role } from "src/enums/role";
+import crypto from "node:crypto";
 export type CreateUserProps = {
   name: string;
   email: string;
@@ -24,7 +25,7 @@ export class User {
     public role: Role,
     public createdAt: Date,
     public avatarUrl?: string,
-  ) {}
+  ) { }
 
   static create(props: CreateUserProps) {
     return new User(

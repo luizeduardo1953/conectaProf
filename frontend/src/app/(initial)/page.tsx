@@ -1,11 +1,25 @@
-'use client';
+import { Search, MapPin, Star, User, ShieldCheck, Heart } from 'lucide-react';
+import DisciplineList from '@/components/DisciplineList';
+import axios from 'axios';
 
-import { Search, MapPin, Star, User, BookOpen, ShieldCheck, Heart } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+interface Discipline {
+  id: string;
+  name: string;
+}
 
-export default function Initial() {
+async function getDisciplines() {
+  try {
+    const res = await axios.get("http://backend:8000/discipline");
+    return res.data;
+  } catch (error) {
+    console.error("ERRO REAL:", error);
+    throw error;
+  }
+}
 
-  const router = useRouter();
+export default async function Initial() {
+
+  const disciplines = await getDisciplines();
 
     return (
     <div className="min-h-screen bg-gray-50 font-sans text-slate-800">
@@ -28,10 +42,10 @@ export default function Initial() {
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-4">
-            <a onClick={() => router.push(`/signin`)} className="text-sm font-medium hover:text-rose-500 cursor-pointer hidden sm:block">Entrar</a>
-            <button onClick={() => router.push(`/signup`)} className="bg-slate-900 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-900/20">
+            <a href="/signin" className="text-sm font-medium hover:text-rose-500 cursor-pointer hidden sm:block">Entrar</a>
+            <a href="/signup" className="bg-slate-900 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-slate-800 transition shadow-lg shadow-slate-900/20">
               Cadastre-se
-            </button>
+            </a>
           </div>
         </div>
       </header>
@@ -127,16 +141,7 @@ export default function Initial() {
             <a href="#" className="text-rose-500 font-bold text-sm hover:underline">Ver todos</a>
         </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((cat) => (
-                <div key={cat} className="group bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-rose-200 transition cursor-pointer flex flex-col items-center text-center gap-3">
-                    <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 group-hover:text-rose-500 group-hover:bg-rose-50 transition">
-                        <BookOpen size={20} />
-                    </div>
-                    <span className="font-bold text-slate-700 text-sm">Matéria {cat}</span>
-                </div>
-            ))}
-        </div>
+        <DisciplineList disciplines={disciplines} />
       </section>
 
       {/* --- GRID DE CARDS (LISTAGEM) --- */}
