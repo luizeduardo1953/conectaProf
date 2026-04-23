@@ -20,4 +20,8 @@ export class CreateTeacherDto {
   @IsString()
   @IsOptional()
   telephone?: string;
+
+  @IsString()
+  @IsOptional()
+  location?: string;
 }

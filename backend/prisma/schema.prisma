@@ -1,12 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -28,14 +24,14 @@ enum SchedulingStatus {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  name         String    @db.VarChar(255)
-  email        String    @unique @db.VarChar(255)
-  password_hash     String    @db.VarChar(255)
-  role         Role
-  avatarUrl    String?   @db.VarChar(255)
-  createdAt    DateTime  @default(now()) @map("created_at")
-  deletedAt    DateTime? @map("deleted_at")
+  id            String    @id @default(uuid())
+  name          String    @db.VarChar(255)
+  email         String    @unique @db.VarChar(255)
+  password_hash String    @db.VarChar(255)
+  role          Role
+  avatarUrl     String?   @db.VarChar(255)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  deletedAt     DateTime? @map("deleted_at")
 
   // Relações
   teacherProfile Teacher?
@@ -49,8 +45,9 @@ model Teacher {
   userId    String  @unique @map("user_id")
   biography String? @db.Text
   training  String? @db.VarChar(255)
-  priceHour Float? @map("price_hour")
-  telephone String  @db.VarChar(20)
+  priceHour Float?  @map("price_hour")
+  telephone String? @db.VarChar(20)
+  location  String? @db.VarChar(255)
 
   // Relações
   user           User                @relation(fields: [userId], references: [id])
@@ -63,7 +60,7 @@ model Teacher {
 
 model Discipline {
   id   String @id @default(uuid())
-  name String @db.VarChar(255) @unique
+  name String @unique @db.VarChar(255)
 
   // Relações
   teachers    TeacherDiscipline[]
@@ -104,7 +101,7 @@ model Scheduling {
   dateHourEnd   DateTime         @map("date_hour_end")
   status        SchedulingStatus @default(Pending)
   observation   String?          @db.Text
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt     DateTime         @default(now()) @map("created_at")
 
   // Relações
   student    User       @relation(fields: [studentId], references: [id])

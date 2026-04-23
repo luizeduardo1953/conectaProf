@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/services/firebaseConfig';
+
 import { ArrowLeft, User as UserIcon, Calendar, Clock, BookOpen } from 'lucide-react';
 
 export default function TeachersList() {
@@ -15,21 +14,25 @@ export default function TeachersList() {
     const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            if (currentUser) {
+        const fetchTeachersData = async () => {
+            const token = localStorage.getItem('token');
+            const url = process.env.NEXT_PUBLIC_URL_BACKEND;
+            
+            if (token) {
                 try {
                     // Fetch student user (to get their ID for booking)
-                    const userRes = await fetch(`http://localhost:8000/users/email/${currentUser.email}`);
-                    if (userRes.ok) {
-                        const userText = await userRes.text();
-                        if (userText) {
-                            const userData = JSON.parse(userText);
-                            setDbUser(userData);
+                    const userRes = await fetch(`${url}/users/me`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
                         }
+                    });
+                    if (userRes.ok) {
+                        const userData = await userRes.json();
+                        setDbUser(userData);
                     }
 
                     // Fetch all teachers
-                    const res = await fetch('http://localhost:8000/teachers');
+                    const res = await fetch(`${url}/teachers`);
                     if (res.ok) {
                         const data = await res.json();
                         setTeachers(data);
@@ -38,12 +41,11 @@ export default function TeachersList() {
                     console.error('Error fetching data:', error);
                 }
             } else {
-                router.push('/login');
+                router.push('/signin');
             }
             setLoading(false);
-        });
-
-        return () => unsubscribe();
+        };
+        fetchTeachersData();
     }, [router]);
 
     const handleBookClass = async (teacherId: string, availabilityStr: string) => {
@@ -56,9 +58,15 @@ export default function TeachersList() {
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
 
-            const response = await fetch('http://localhost:8000/agendamentos', {
+            const url = process.env.NEXT_PUBLIC_URL_BACKEND;
+            const token = localStorage.getItem('token');
+
+            const response = await fetch(`${url}/scheduling`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     studentId: dbUser.id,
                     teacherId: teacherId,

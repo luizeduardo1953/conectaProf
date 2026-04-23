@@ -1,0 +1,114 @@
+# ============================================================
+# docker-compose.full.yml — Stack Completa com Hot Reload
+# ============================================================
+# Use este arquivo apenas se precisar de tudo rodando no Docker
+# (ex: demos, testes de integração, CI).
+#
+# Para desenvolvimento do dia a dia, prefira o docker-compose.yml
+# (só o banco) + backend/frontend rodando localmente.
+#
+# Como usar:
+#   docker compose -f docker-compose.full.yml up --build
+#   docker compose -f docker-compose.full.yml down
+#
+# Hot reload funciona via polling (WATCHPACK_POLLING e ts-node-dev)
+# que é necessário no Windows/WSL2 porque os eventos inotify
+# não são propagados corretamente para containers.
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # PostgreSQL — Banco de Dados
+  # ----------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: conectaprof_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-conectaprof}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Pirapora123/}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-conectaprof}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ----------------------------------------------------------
+  # Backend — NestJS com hot reload (watch mode)
+  # ----------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+      target: deps          # Usa o stage "deps" para ter devDependencies
+    container_name: conectaprof_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env.docker   # env com DB_HOST=postgres
+    environment:
+      NODE_ENV: development
+      NODE_OPTIONS: "--max-old-space-size=2048"
+    ports:
+      - "8000:8000"
+    volumes:
+      # Monta o código-fonte (o volume sobrescreve o COPY do Dockerfile)
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+      # Preserva node_modules e dist do container (não sincroniza com o host)
+      - backend_node_modules:/app/node_modules
+      - backend_dist:/app/dist
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Aguarda o banco, sincroniza o schema, roda seed e inicia em watch mode
+    command: >
+      sh -c "
+        npx prisma generate &&
+        npx prisma db push --skip-generate &&
+        npm run seed 2>/dev/null || true &&
+        npm run start:dev
+      "
+
+  # ----------------------------------------------------------
+  # Frontend — Next.js com hot reload via polling
+  # ----------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    container_name: conectaprof_frontend
+    restart: unless-stopped
+    environment:
+      # NEXT_PUBLIC_URL_BACKEND fica vazio aqui, pois o browser
+      # não tem acesso ao hostname "backend" — use o IP do host.
+      # Em produção, substitua pelo domínio real.
+      NEXT_PUBLIC_URL_BACKEND: http://localhost:8000
+      NODE_ENV: development
+      NODE_OPTIONS: "--max-old-space-size=2048"
+      # Activa polling de filesystem (necessário no Windows/WSL2)
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - frontend_node_modules:/app/node_modules
+      - frontend_next:/app/.next
+    depends_on:
+      - backend
+    command: npm run dev
+
+volumes:
+  postgres_data:
+    name: conectaprof_postgres_data
+  backend_node_modules:
+  backend_dist:
+  frontend_node_modules:
+  frontend_next:

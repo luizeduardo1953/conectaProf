@@ -6,6 +6,7 @@ export type CreateTeacherProps = {
   training?: string | null;
   priceHour?: number | null;
   telephone?: string | null;
+  location?: string | null;
 }
 
 export type UpdateTeacherInput = {
@@ -13,6 +14,7 @@ export type UpdateTeacherInput = {
   training?: string | null;
   priceHour?: number | null;
   telephone?: string | null;
+  location?: string | null;
 }
 
 export class Teacher {
@@ -22,14 +24,18 @@ export class Teacher {
   public training?: string | null;
   public priceHour?: number | null;
   public telephone?: string | null;
+  public location?: string | null;
+  public availabilities?: any[];
 
-  constructor(id: string, props: CreateTeacherProps) {
+  constructor(id: string, props: CreateTeacherProps & { availabilities?: any[] }) {
     this.id = id;
     this.userId = props.userId;
     this.biography = props.biography ?? null;
     this.training = props.training ?? null;
     this.priceHour = props.priceHour ?? 0;
     this.telephone = props.telephone ?? '';
+    this.location = props.location ?? null;
+    this.availabilities = props.availabilities ?? [];
   }
 
   static create(props: CreateTeacherProps): Teacher {

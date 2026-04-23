@@ -15,24 +15,51 @@ interface SchedulingModalProps {
 export default function SchedulingModal({ teacher, disciplines, onClose, onSuccess }: SchedulingModalProps) {
   const [disciplineId, setDisciplineId] = useState('');
   const [dateStart, setDateStart] = useState('');
-  const [timeStart, setTimeStart] = useState('');
-  const [timeEnd, setTimeEnd] = useState('');
+  const [selectedSlotIndex, setSelectedSlotIndex] = useState<string>('');
   const [observation, setObservation] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  const parseTime = (val: string) => {
+    try {
+      if (!val) return '';
+      return new Date(val).toISOString().substr(11, 5);
+    } catch {
+      return val;
+    }
+  };
+
+  // Determine available slots for the selected date
+  let dayOfWeek = -1;
+  if (dateStart) {
+    const [year, month, day] = dateStart.split('-');
+    const localDate = new Date(Number(year), Number(month) - 1, Number(day));
+    dayOfWeek = localDate.getDay();
+  }
+  
+  const availableSlots = (teacher.availabilities || []).filter(
+    (a: any) => Number(a.dayWeek) === dayOfWeek
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!disciplineId || !dateStart || !timeStart || !timeEnd) {
-      setError('Preencha todos os campos obrigatórios.');
+    if (!disciplineId || !dateStart || selectedSlotIndex === '') {
+      setError('Preencha a disciplina, a data e um horário disponível.');
       return;
     }
     setLoading(true);
     try {
-      const dateHourStart = new Date(`${dateStart}T${timeStart}:00`).toISOString();
-      const dateHourEnd = new Date(`${dateStart}T${timeEnd}:00`).toISOString();
+      const slot = availableSlots[Number(selectedSlotIndex)];
+      if (!slot) throw new Error('Horário inválido.');
+
+      const startTimeStr = parseTime(slot.timeStart || '');
+      const endTimeStr = parseTime(slot.timeEnd || '');
+
+      const dateHourStart = new Date(`${dateStart}T${startTimeStr}:00`).toISOString();
+      const dateHourEnd = new Date(`${dateStart}T${endTimeStr}:00`).toISOString();
+
       await createScheduling({
         teacherId: teacher.id,
         disciplineId,
@@ -98,8 +125,10 @@ export default function SchedulingModal({ teacher, disciplines, onClose, onSucce
               className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition"
             >
               <option value="">Selecione uma disciplina</option>
-              {disciplines.map((d) => (
-                <option key={d.id} value={d.id}>{d.name}</option>
+              {(teacher.disciplines || []).map((td: any) => (
+                <option key={td.disciplineId} value={td.disciplineId}>
+                  {td.discipline?.name || 'Disciplina'}
+                </option>
               ))}
             </select>
           </div>
@@ -112,7 +141,10 @@ export default function SchedulingModal({ teacher, disciplines, onClose, onSucce
             <input
               type="date"
               value={dateStart}
-              onChange={(e) => setDateStart(e.target.value)}
+              onChange={(e) => {
+                setDateStart(e.target.value);
+                setSelectedSlotIndex(''); // reset selected slot when date changes
+              }}
               min={new Date().toISOString().split('T')[0]}
               required
               className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition"
@@ -120,32 +152,32 @@ export default function SchedulingModal({ teacher, disciplines, onClose, onSucce
           </div>
 
           {/* Horários */}
-          <div className="grid grid-cols-2 gap-4">
+          {dateStart && (
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                <Clock size={14} className="inline mr-1.5" />Início *
+                <Clock size={14} className="inline mr-1.5" />Horário Disponível *
               </label>
-              <input
-                type="time"
-                value={timeStart}
-                onChange={(e) => setTimeStart(e.target.value)}
-                required
-                className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition"
-              />
+              {availableSlots.length > 0 ? (
+                <select
+                  value={selectedSlotIndex}
+                  onChange={(e) => setSelectedSlotIndex(e.target.value)}
+                  required
+                  className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition"
+                >
+                  <option value="">Selecione um horário</option>
+                  {availableSlots.map((slot: any, idx: number) => (
+                    <option key={slot.id || idx} value={idx}>
+                      {parseTime(slot.timeStart || '')} às {parseTime(slot.timeEnd || '')}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="w-full rounded-xl bg-rose-50 border border-rose-100 p-3 text-rose-600 text-sm">
+                  O professor não possui horários disponíveis neste dia.
+                </div>
+              )}
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                <Clock size={14} className="inline mr-1.5" />Término *
-              </label>
-              <input
-                type="time"
-                value={timeEnd}
-                onChange={(e) => setTimeEnd(e.target.value)}
-                required
-                className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition"
-              />
-            </div>
-          </div>
+          )}
 
           {/* Observação */}
           <div>

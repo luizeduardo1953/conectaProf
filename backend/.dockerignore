@@ -1,8 +1,7 @@
 node_modules
 npm-debug.log
 .git
-.env
 dist
 .nyc_output
 coverage
-prisma/migrations  # Use volumes para migrations
+*.log

@@ -1,56 +1,40 @@
-version: '3.8'
+# docker-compose.yml — Desenvolvimento Local
+#
+# Use este arquivo para subir APENAS o banco de dados.
+# O backend e o frontend rodam localmente com hot reload nativo.
+#
+# Como usar:
+#   docker compose up -d
+#
+# Em seguida, em terminais separados:
+#   cd backend  && npm run start:dev   (NestJS com hot reload)
+#   cd frontend && npm run dev         (Next.js com hot reload)
+#
+# Para parar o banco:
+#   docker compose down
+#
+# Para apagar os dados do banco (reset):
+#   docker compose down -v
 
 services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    env_file:
-      - ./backend/.env.docker
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-
-    depends_on:
-      postgres:
-        condition: service_healthy
-    command: sh -c "npm run build && npx prisma db push && npm run seed && node dist/main.js"
-    environment:
-      NODE_OPTIONS: "--max-old-space-size=4096"
-    mem_limit: 4096m
-
   postgres:
     image: postgres:16-alpine
+    container_name: conectaprof_db
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-conectaprof}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
-      - "5433:5432"
+      - "5433:5432"       # acesso local: localhost:5433
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-conectaprof}"]
       interval: 5s
       timeout: 5s
-      retries: 5
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
-      - NODE_OPTIONS=--max-old-space-size=3072
-    mem_limit: 4096m
-    depends_on:
-      - backend
-    command: npm run dev
+      retries: 10
 
 volumes:
   postgres_data:
+    name: conectaprof_postgres_data

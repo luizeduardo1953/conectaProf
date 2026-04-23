@@ -9,9 +9,12 @@ export interface User {
 export interface Availability {
   id: string;
   teacherId: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
+  dayWeek?: number; // Prisma mapping
+  dayOfWeek?: number;
+  timeStart?: string; // Prisma mapping
+  timeEnd?: string;   // Prisma mapping
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface Teacher {
@@ -23,6 +26,7 @@ export interface Teacher {
   telephone?: string;
   user?: User;
   availabilities?: Availability[];
+  disciplines?: any[];
 }
 
 export interface Discipline {

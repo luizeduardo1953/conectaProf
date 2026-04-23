@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, HttpException } from "@nestjs/common";
 import { CreateAvailabilityUseCase } from "../application/use-cases/CreateAvailability";
 import { UpdateAvaliabilityUseCase } from "../application/use-cases/UpdateAvailability";
 import { DeleteAvailabilityUseCase } from "../application/use-cases/DeleteAvailability";
@@ -22,7 +22,11 @@ export class AvailabilityController {
     @Roles(Role.Teacher, Role.Admin)
     @Post()
     async create(@Body() data: CreateAvailabilityDto){
-        return await this.createAvailability.execute(data);
+        try {
+            return await this.createAvailability.execute(data);
+        } catch (e) {
+            throw new HttpException('DEBUG_ERROR: ' + e.message, 500);
+        }
     }
 
     @Roles(Role.Teacher, Role.Admin)

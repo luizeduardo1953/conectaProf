@@ -1,9 +1,11 @@
-import { Availability } from "src/availability/domain/entities/Availability";   
-import { AvailabilityRepository } from "src/availability/domain/repositories/AvailabilityRepository";
+﻿import { Availability } from "src/availability/domain/entities/Availability";   
+import { AvailabilityPrismaRepository } from "src/availability/infra/database/AvailabilityPrismaRepository";
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class FindAllAvailabilityUseCase {
     constructor(
-        private readonly availabilityRepository: AvailabilityRepository
+        private readonly availabilityRepository: AvailabilityPrismaRepository
     ) {}
 
     async execute(): Promise<Availability[]> {

@@ -1,68 +1,76 @@
+'use client';
+
 import { useState } from "react";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function Signin() {
+export default function SigninForm() {
+  const auth = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-    const auth = useAuth();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await auth.signin(email, password);
+  };
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {/* Erro inline */}
+      {auth.error && (
+        <div className="flex items-center gap-2 bg-red-50 text-red-600 border border-red-200 rounded-xl p-3 text-sm">
+          <AlertCircle size={16} className="flex-shrink-0" />
+          <span>{auth.error}</span>
+        </div>
+      )}
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        await auth.signin(email, password);
-        setLoading(false);
-    };
+      {/* Input Email */}
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+          <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-rose-500 transition" />
+        </div>
+        <input
+          id="signin-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Seu e-mail"
+          className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3.5 pl-11 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition font-medium placeholder-slate-400"
+          required
+        />
+      </div>
 
-    return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            {/* Input Email */}
-            <div className="relative group">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-rose-500 transition" />
-                </div>
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Seu e-mail"
-                    className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3.5 pl-11 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition font-medium placeholder-slate-400"
-                    required
-                />
-            </div>
+      {/* Input Senha */}
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+          <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-rose-500 transition" />
+        </div>
+        <input
+          id="signin-password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Sua senha"
+          className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3.5 pl-11 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition font-medium placeholder-slate-400"
+          required
+        />
+      </div>
 
-            {/* Input Senha */}
-            <div className="relative group">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-rose-500 transition" />
-                </div>
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Sua senha"
-                    className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3.5 pl-11 text-slate-700 outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition font-medium placeholder-slate-400"
-                    required
-                />
-            </div>
+      <div className="flex justify-end">
+        <a href="#" className="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline">
+          Esqueceu a senha?
+        </a>
+      </div>
 
-            <div className="flex justify-end">
-                <a href="#" className="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline">
-                    Esqueceu a senha?
-                </a>
-            </div>
-
-            {/* Botão Principal */}
-            <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-xl bg-rose-500 py-3.5 font-bold text-white shadow-lg shadow-rose-500/30 transition hover:bg-rose-600 hover:shadow-rose-500/40 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-                {loading ? 'Entrando...' : 'Entrar na conta'}
-            </button>
-        </form>
-    )
+      {/* Botão Principal */}
+      <button
+        id="signin-submit"
+        type="submit"
+        disabled={auth.loading}
+        className="w-full rounded-xl bg-rose-500 py-3.5 font-bold text-white shadow-lg shadow-rose-500/30 transition hover:bg-rose-600 hover:shadow-rose-500/40 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+      >
+        {auth.loading ? 'Entrando...' : 'Entrar na conta'}
+      </button>
+    </form>
+  );
 }

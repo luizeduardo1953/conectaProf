@@ -1,11 +1,11 @@
 import { CheckCircle2 } from 'lucide-react';
-import Signup from '@/components/Signup';
+import SignupForm from '@/components/Signup';
 
 export default function SignupPage() {
     return (
         <div className="min-h-screen w-full bg-gray-50 font-sans text-slate-800 flex items-center justify-center p-4 relative overflow-hidden">
 
-            {/* --- Background Decorativo (Igual ao Login) --- */}
+            {/* --- Background Decorativo --- */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
                 <div className="absolute top-[-10%] left-[-5%] w-96 h-96 rounded-full bg-rose-100 opacity-40 blur-3xl"></div>
                 <div className="absolute bottom-[-10%] right-[-5%] w-80 h-80 rounded-full bg-blue-50 opacity-40 blur-3xl"></div>
@@ -16,15 +16,15 @@ export default function SignupPage() {
                 {/* --- Lado Esquerdo: Formulário --- */}
                 <div className="p-8 sm:p-12 order-2 lg:order-1">
                     <div className="mb-8">
-                        <div className="flex items-center gap-2 mb-6 cursor-pointer" onClick={() => window.location.href = '/'}>
+                        <a href="/" className="flex items-center gap-2 mb-6 w-fit hover:opacity-80 transition">
                             <div className="w-8 h-8 bg-rose-500 rounded-lg flex items-center justify-center text-white font-bold">C</div>
                             <span className="text-xl font-bold text-slate-900">ConectaProf</span>
-                        </div>
+                        </a>
                         <h2 className="text-3xl font-bold text-slate-900">Crie sua conta</h2>
                         <p className="text-slate-500 mt-2">Junte-se à nossa comunidade de aprendizado.</p>
                     </div>
 
-                    <Signup />
+                    <SignupForm />
 
                     <p className="text-center mt-8 text-sm text-slate-500">
                         Já tem uma conta? <a href="/signin" className="text-rose-500 font-bold hover:underline">Faça Login</a>
@@ -33,9 +33,8 @@ export default function SignupPage() {
 
                 {/* --- Lado Direito: Visual/Benefícios --- */}
                 <div className="hidden lg:flex flex-col justify-between bg-slate-900 p-12 text-white relative overflow-hidden order-1 lg:order-2">
-                    {/* Elementos Decorativos de Fundo */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
 
                     <div className="relative z-10 mt-10">
                         <h3 className="text-3xl font-bold mb-6 leading-snug">
@@ -53,11 +52,11 @@ export default function SignupPage() {
                             </li>
                             <li className="flex items-center gap-3">
                                 <div className="p-1 bg-rose-500/20 rounded-full text-rose-400"><CheckCircle2 size={18} /></div>
-                                Sala de aula virtual integrada
+                                Aulas online e presenciais
                             </li>
                             <li className="flex items-center gap-3">
                                 <div className="p-1 bg-rose-500/20 rounded-full text-rose-400"><CheckCircle2 size={18} /></div>
-                                Pagamento seguro
+                                Suporte dedicado 24/7
                             </li>
                         </ul>
                     </div>
@@ -73,7 +72,6 @@ export default function SignupPage() {
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     );

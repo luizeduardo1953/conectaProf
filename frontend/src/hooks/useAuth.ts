@@ -1,44 +1,88 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '@/lib/api';
-import { User } from '@/lib/types';
-import axios from 'axios';
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const signin = async (email: string, password: string) => {
-    try {
-      const response = await axios.post('http://backend:8000/auth/signin', {email, password});
+  const url = process.env.NEXT_PUBLIC_URL_BACKEND;
 
-      localStorage.setItem('token', response.data.token);
-      setUser(response.data.user);
+  const signin = async (email: string, password: string): Promise<boolean> => {
+    setError(null);
+    setLoading(true);
+    try {
+      const response = await fetch(`${url}/auth/signin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errMsg = Array.isArray(data?.message) ? data.message[0] : data?.message;
+        setError(errMsg || 'E-mail ou senha incorretos.');
+        return false;
+      }
+
+      localStorage.setItem('token', data.token);
+      router.push('/dashboard');
+      return true;
+    } catch {
+      setError('Erro de conexão com o servidor. Tente novamente.');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signup = async (
+    name: string,
+    email: string,
+    password: string,
+    role: 'student' | 'teacher',
+  ): Promise<boolean> => {
+    setError(null);
+    setLoading(true);
+    try {
+      const response = await fetch(`${url}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password_hash: password, role }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errMsg = Array.isArray(data?.message) ? data.message[0] : data?.message;
+        setError(errMsg || 'Erro ao criar conta. Verifique os dados e tente novamente.');
+        return false;
+      }
+
+      // Após signup, faz login automaticamente
+      const loginRes = await fetch(`${url}/auth/signin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (loginRes.ok) {
+        const loginData = await loginRes.json();
+        localStorage.setItem('token', loginData.token);
+      }
 
       router.push('/dashboard');
-    } catch (error) {
-      console.error('Erro no login:', error);
-      alert('Erro no login');
+      return true;
+    } catch {
+      setError('Erro de conexão com o servidor. Tente novamente.');
+      return false;
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const signup = async (name: string, email: string, password_hash: string, role: 'student' | 'teacher') => {
-    try {
-      const response = await axios.post('http://backend:8000/auth/signup', {name, email, password_hash, role});
-
-      setUser(response.data.user);
-      router.push('/dashboard');
-
-    } catch (error) {
-      console.error('Erro no cadastro:', error);
-      alert('Erro no cadastro');
-    }
-  }
-
-  return { user, loading, signin, signup };
-
+  return { loading, error, signin, signup };
 }

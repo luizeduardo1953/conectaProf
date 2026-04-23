@@ -9,16 +9,21 @@ export class AvailabilityPrismaRepository implements AvailabilityRepository {
         private readonly prisma: PrismaService
     ) { }
 
-    async create(data: CreateAvailabilityInput): Promise<void> {
-        await this.prisma.availability.create({
-            data: {
-                dayWeek: data.dayOfWeek,
-                timeStart: data.startTime,
-                timeEnd: data.endTime,
-                teacherId: data.teacherId
-            }
-        });
-
+    async create(data: CreateAvailabilityInput): Promise<Availability> {
+        try {
+            const created = await this.prisma.availability.create({
+                data: {
+                    dayWeek: data.dayOfWeek,
+                    timeStart: new Date(data.startTime),
+                    timeEnd: new Date(data.endTime),
+                    teacherId: data.teacherId
+                }
+            });
+            return created as any as Availability;
+        } catch (e) {
+            console.error('AVAIL_PRISMA_ERROR:', e);
+            throw e;
+        }
     }
 
     async findById(id: string): Promise<Availability | null> {
