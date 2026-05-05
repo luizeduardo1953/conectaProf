@@ -6,6 +6,7 @@ export interface SchedulingRepository {
     findById(id: string): Promise<Scheduling | null>;
     findByStudentId(studentId: string): Promise<Scheduling[] | null>;
     findByTeacherId(teacherId: string): Promise<Scheduling[] | null>;
+    findByTeacherUserId(userId: string): Promise<Scheduling[] | null>;
     findByDisciplineId(disciplineId: string): Promise<Scheduling[] | null>;
     deleteById(id: string): Promise<void>;
     findAll(): Promise<Scheduling[] | null>;

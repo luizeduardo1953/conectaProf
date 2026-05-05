@@ -26,8 +26,10 @@ export class Teacher {
   public telephone?: string | null;
   public location?: string | null;
   public availabilities?: any[];
+  public user?: any;
+  public disciplines?: any[];
 
-  constructor(id: string, props: CreateTeacherProps & { availabilities?: any[] }) {
+  constructor(id: string, props: CreateTeacherProps & { availabilities?: any[]; user?: any; disciplines?: any[] }) {
     this.id = id;
     this.userId = props.userId;
     this.biography = props.biography ?? null;
@@ -36,9 +38,12 @@ export class Teacher {
     this.telephone = props.telephone ?? '';
     this.location = props.location ?? null;
     this.availabilities = props.availabilities ?? [];
+    this.user = props.user ?? null;
+    this.disciplines = props.disciplines ?? [];
   }
 
   static create(props: CreateTeacherProps): Teacher {
     return new Teacher(randomUUID(), props);
   }
-}
+}
+

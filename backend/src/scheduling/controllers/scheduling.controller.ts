@@ -20,7 +20,6 @@ import { Role } from 'src/enums/role';
 export class SchedulingController {
     constructor(private readonly schedulingRepository: SchedulingPrismaRepository) { }
 
-    //Estudante agenda uma aula
     @Roles(Role.Student)
     @Post()
     @HttpCode(201)
@@ -31,9 +30,10 @@ export class SchedulingController {
             teacherId: data.teacherId,
             studentId: req.user.sub,
             disciplineId: data.disciplineId,
-            dateHourStart: data.dateHourStart,
-            dateHourEnd: data.dateHourEnd,
-            observation: data.observation,
+            dateHourStart: new Date(data.dateHourStart),
+            dateHourEnd: new Date(data.dateHourEnd),
+            observation: data.observation ?? '',
+            status: 'pending' as any,
             createdAt: new Date(),
         }
 
@@ -47,11 +47,12 @@ export class SchedulingController {
         return this.schedulingRepository.findAll();
     }
 
-    //Professor vê suas aulas
+    //Professor vê suas aulas (busca pelo teacherId via userId do JWT)
     @Roles(Role.Teacher)
     @Get('my-classes')
-    findMyTeacherScheduling(@Req() req) {
-        return this.schedulingRepository.findByTeacherId(req.user.sub);
+    async findMyTeacherScheduling(@Req() req) {
+        // O JWT tem sub = userId, precisamos buscar o teacher pelo userId
+        return this.schedulingRepository.findByTeacherUserId(req.user.sub);
     }
 
     // Estudante vê apenas seus próprios agendamentos (pelo token)
@@ -72,7 +73,7 @@ export class SchedulingController {
     @Roles(Role.Admin)
     @Get('student/:id')
     async findByStudentId(@Req() req, @Param('id', ParseUUIDPipe) id: string) {
-        return this.schedulingRepository.findByStudentId(req);
+        return this.schedulingRepository.findByStudentId(id);
     }
 
     //Admin vê todas as aulas de uma disciplina

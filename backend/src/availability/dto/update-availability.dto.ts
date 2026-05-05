@@ -1,19 +1,19 @@
-import { IsNotEmpty, IsString, IsNumber } from "class-validator";
+import { IsOptional, IsString, IsNumber } from "class-validator";
 
 export class UpdateAvailabilityDto {
-    @IsNotEmpty()
+    @IsOptional()
     @IsNumber()
     dayOfWeek?: number;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     startTime?: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     endTime?: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     teacherId?: string;
 }

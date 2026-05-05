@@ -54,6 +54,7 @@ services:
     environment:
       NODE_ENV: development
       NODE_OPTIONS: "--max-old-space-size=2048"
+      CORS_ORIGIN: "http://localhost:3000"
     ports:
       - "8000:8000"
     volumes:
@@ -71,7 +72,7 @@ services:
       sh -c "
         npx prisma generate &&
         npx prisma db push --skip-generate &&
-        npm run seed 2>/dev/null || true &&
+        npm run seed || echo "Seed skipped or already ran" &&
         npm run start:dev
       "
 

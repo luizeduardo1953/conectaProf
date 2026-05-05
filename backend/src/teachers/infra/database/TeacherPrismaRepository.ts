@@ -7,6 +7,20 @@ import { UpdateTeacherInput, Teacher } from 'src/teachers/domain/entities/Teache
 export class TeacherPrismaRepository implements TeacherRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  private mapToTeacher(t: any): Teacher {
+    return new Teacher(t.id, {
+      userId: t.userId,
+      biography: t.biography,
+      training: t.training,
+      priceHour: t.priceHour ? Number(t.priceHour) : null,
+      telephone: t.telephone,
+      location: t.location ?? null,
+      availabilities: t.availabilities ?? [],
+      user: t.user ?? null,
+      disciplines: t.disciplines ?? [],
+    });
+  }
+
   async create(teacher: Teacher): Promise<Teacher> {
     const data = await this.prisma.teacher.create({
       data: {
@@ -20,56 +34,39 @@ export class TeacherPrismaRepository implements TeacherRepository {
       },
       include: {
         availabilities: true,
-      }
+        user: true,
+        disciplines: { include: { discipline: true } },
+      },
     });
 
-    return new Teacher(data.id, {
-      userId: data.userId,
-      biography: data.biography,
-      training: data.training,
-      priceHour: data.priceHour ? Number(data.priceHour) : null,
-      telephone: data.telephone,
-      location: (data as any).location ?? null,
-      availabilities: (data as any).availabilities ?? [],
-    });
+    return this.mapToTeacher(data);
   }
 
   async findById(id: string): Promise<Teacher> {
     const data = await this.prisma.teacher.findUnique({
       where: { id },
-      include: { availabilities: true }
+      include: {
+        availabilities: true,
+        user: true,
+        disciplines: { include: { discipline: true } },
+      },
     });
 
     if (!data) throw new NotFoundException('Professor não encontrado');
 
-    return new Teacher(data.id, {
-      userId: data.userId,
-      biography: data.biography,
-      training: data.training,
-      priceHour: data.priceHour ? Number(data.priceHour) : null,
-      telephone: data.telephone,
-      location: (data as any).location ?? null,
-      availabilities: (data as any).availabilities ?? [],
-    });
+    return this.mapToTeacher(data);
   }
 
   async getAll(): Promise<Teacher[]> {
     const data = await this.prisma.teacher.findMany({
-      include: { availabilities: true }
+      include: {
+        availabilities: true,
+        user: true,
+        disciplines: { include: { discipline: true } },
+      },
     });
 
-    return data.map(
-      (t) =>
-        new Teacher(t.id, {
-          userId: t.userId,
-          biography: t.biography,
-          training: t.training,
-          priceHour: t.priceHour ? Number(t.priceHour) : null,
-          telephone: t.telephone,
-          location: (t as any).location ?? null,
-          availabilities: (t as any).availabilities ?? [],
-        }),
-    );
+    return data.map((t) => this.mapToTeacher(t));
   }
 
   async delete(id: string): Promise<void> {
@@ -88,17 +85,13 @@ export class TeacherPrismaRepository implements TeacherRepository {
         telephone: data.telephone ?? undefined,
         location: data.location ?? undefined,
       },
-      include: { availabilities: true }
+      include: {
+        availabilities: true,
+        user: true,
+        disciplines: { include: { discipline: true } },
+      },
     });
 
-    return new Teacher(updated.id, {
-      userId: updated.userId,
-      biography: updated.biography,
-      training: updated.training,
-      priceHour: updated.priceHour ? Number(updated.priceHour) : null,
-      telephone: updated.telephone,
-      location: (updated as any).location ?? null,
-      availabilities: (updated as any).availabilities ?? [],
-    });
+    return this.mapToTeacher(updated);
   }
 }

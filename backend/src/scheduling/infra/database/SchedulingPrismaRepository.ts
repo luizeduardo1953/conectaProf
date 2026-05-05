@@ -40,13 +40,24 @@ export class SchedulingPrismaRepository implements SchedulingRepository {
     }
 
     async findAll(): Promise<Scheduling[] | null> {
-        const data = await this.prisma.scheduling.findMany();
+        const data = await this.prisma.scheduling.findMany({
+            include: {
+                discipline: true,
+                teacher: { include: { user: true } },
+                student: true,
+            },
+        });
         return data as unknown as Scheduling[] | null;
     }
 
     async findById(id: string): Promise<Scheduling | null> {
         const data = await this.prisma.scheduling.findUnique({
             where: { id },
+            include: {
+                discipline: true,
+                teacher: { include: { user: true } },
+                student: true,
+            },
         });
         return data as unknown as Scheduling | null;
     }
@@ -54,6 +65,11 @@ export class SchedulingPrismaRepository implements SchedulingRepository {
     async findByStudentId(studentId: string): Promise<Scheduling[] | null> {
         const data = await this.prisma.scheduling.findMany({
             where: { studentId },
+            include: {
+                discipline: true,
+                teacher: { include: { user: true } },
+                student: true,
+            },
         });
         return data as unknown as Scheduling[] | null;
     }
@@ -61,6 +77,11 @@ export class SchedulingPrismaRepository implements SchedulingRepository {
     async findByTeacherId(teacherId: string): Promise<Scheduling[] | null> {
         const data = await this.prisma.scheduling.findMany({
             where: { teacherId },
+            include: {
+                discipline: true,
+                teacher: { include: { user: true } },
+                student: true,
+            },
         });
         return data as unknown as Scheduling[] | null;
     }
@@ -68,6 +89,11 @@ export class SchedulingPrismaRepository implements SchedulingRepository {
     async findByDisciplineId(disciplineId: string): Promise<Scheduling[] | null> {
         const data = await this.prisma.scheduling.findMany({
             where: { disciplineId },
+            include: {
+                discipline: true,
+                teacher: { include: { user: true } },
+                student: true,
+            },
         });
         return data as unknown as Scheduling[] | null;
     }
@@ -78,5 +104,18 @@ export class SchedulingPrismaRepository implements SchedulingRepository {
         });
     }
 
+    async findByTeacherUserId(userId: string): Promise<Scheduling[] | null> {
+        const data = await this.prisma.scheduling.findMany({
+            where: {
+                teacher: { userId },
+            },
+            include: {
+                discipline: true,
+                teacher: { include: { user: true } },
+                student: true,
+            },
+        });
+        return data as unknown as Scheduling[] | null;
+    }
 
-}
+}

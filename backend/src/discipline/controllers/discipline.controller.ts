@@ -29,8 +29,8 @@ export class DisciplineController {
 
     @Roles(Role.Admin)
     @Put()
-    async update(@Body() data: UpdateDisciplineDto, newName: string): Promise<Discipline> {
-        return this.disciplineRepository.update(data.name, newName);
+    async update(@Body() body: { oldName: string; newName: string }): Promise<Discipline> {
+        return this.disciplineRepository.update(body.oldName, body.newName);
     }
 
     @Roles(Role.Admin)
