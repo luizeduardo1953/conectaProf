@@ -54,3 +54,16 @@ export class SignUpRequestDto {
     @IsEnum(Role)
     role: Role;
 }
+
+export class ResetPasswordDto {
+    @IsNotEmpty()
+    @IsString()
+    @IsEmail()
+    email: string;
+
+    @IsNotEmpty()
+    @IsString()
+    @MinLength(8, { message: 'A nova senha deve ter no mínimo 8 caracteres.' })
+    @MaxLength(20, { message: 'A nova senha deve ter no máximo 20 caracteres.' })
+    newPassword: string;
+}

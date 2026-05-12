@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
-import { SignUpRequestDto, SignInRequestDto } from './auth.dto';
+import { SignUpRequestDto, SignInRequestDto, ResetPasswordDto } from './auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,5 +24,12 @@ export class AuthController {
   @Post('signup')
   signUp(@Body() signUpDto: SignUpRequestDto) {
     return this.authService.signUp(signUpDto);
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-password')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 }

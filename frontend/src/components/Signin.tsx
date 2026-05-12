@@ -57,7 +57,7 @@ export default function SigninForm() {
       </div>
 
       <div className="flex justify-end">
-        <a href="#" className="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline">
+        <a href="/forgot-password" className="text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline">
           Esqueceu a senha?
         </a>
       </div>

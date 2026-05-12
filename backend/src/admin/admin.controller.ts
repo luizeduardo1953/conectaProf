@@ -93,6 +93,11 @@ export class AdminController {
   @Delete('users/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param('id', ParseUUIDPipe) id: string) {
+    // Garante que a conta existe
+    const user = await this.getUserByIdUseCase.execute(id);
+    if (!user) return;
+
+    // Usa o repositório para deletar via cascade segura no banco
     await this.deleteUserUseCase.execute(id);
   }
 

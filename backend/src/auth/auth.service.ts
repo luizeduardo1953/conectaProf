@@ -1,8 +1,8 @@
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserPrismaRepository } from 'src/users/infra/database/UserPrismaRepository';
 import { User } from 'src/users/domain/entities/User';
-import { SignInResponseDto, SignUpRequestDto, SignUpResponseDto, SignInRequestDto } from './auth.dto';
+import { SignInResponseDto, SignUpRequestDto, SignUpResponseDto, SignInRequestDto, ResetPasswordDto } from './auth.dto';
 import * as bcrypt from 'bcrypt';
 
 
@@ -68,5 +68,21 @@ export class AuthService {
       role: newUser.role,
     };
   }
-    
+
+  async resetPassword(data: ResetPasswordDto): Promise<{ message: string }> {
+    const user = await this.userPrismaRepository.findByEmail(data.email);
+
+    if (!user) {
+      throw new NotFoundException('Não existe uma conta com este e-mail.');
+    }
+
+    const newHash = await bcrypt.hash(data.newPassword, 10);
+
+    await this.userPrismaRepository.update(user.id, {
+      id: user.id,
+      password_hash: newHash,
+    });
+
+    return { message: 'Senha redefinida com sucesso.' };
+  }
 }
