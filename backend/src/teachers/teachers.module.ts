@@ -22,5 +22,10 @@ import { CreateTeacherUseCase } from './application/use-cases/CreateTeacher';
     GetAllTeachersUseCase,
     CreateTeacherUseCase,
   ],
+  exports: [
+    TeacherPrismaRepository,
+    GetAllTeachersUseCase,
+    DeleteTeacherUseCase,
+  ],
 })
 export class TeachersModule { }

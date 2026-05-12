@@ -11,6 +11,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
 import { DisciplineModule } from './discipline/discipline.module';
 import { AvailabilityModule } from './availability/availability.module';
+import { UploadModule } from './upload/upload.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { AvailabilityModule } from './availability/availability.module';
     SchedulingModule,
     AvailabilityModule,
     AuthModule,
+    UploadModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AuthGuard }],

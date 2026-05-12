@@ -6,8 +6,34 @@ import {
     User, LogOut, Calendar, Search, Clock, MonitorPlay, X,
     MapPin, DollarSign, SlidersHorizontal, ChevronDown,
     GraduationCap, Star, ArrowRight, BookOpen, Sparkles,
-    Users, Quote
+    Users, Quote, Shield
 } from 'lucide-react';
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_URL_BACKEND ?? '';
+
+function UserAvatar({ src, name, size = 44, className = '' }: { src?: string; name?: string; size?: number; className?: string }) {
+  if (src) {
+    return (
+      <img
+        src={`${BACKEND_URL}${src}`}
+        alt={name ?? 'avatar'}
+        width={size}
+        height={size}
+        className={`rounded-full object-cover border-2 border-white shadow-md ${className}`}
+        style={{ width: size, height: size }}
+        onError={(e: any) => { e.target.style.display = 'none'; }}
+      />
+    );
+  }
+  return (
+    <div
+      className={`rounded-2xl bg-gradient-to-br from-rose-500 to-orange-400 flex items-center justify-center font-black text-white shadow-md shadow-rose-500/25 ${className}`}
+      style={{ width: size, height: size, fontSize: size * 0.38 }}
+    >
+      {(name ?? 'U').charAt(0)}
+    </div>
+  );
+}
 import SchedulingModal from '@/components/SchedulingModal';
 
 const PRICE_PRESETS = [
@@ -151,9 +177,7 @@ export default function Dashboard() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <div className="relative">
-                            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-400 flex items-center justify-center font-black text-white text-lg shadow-md shadow-rose-500/25">
-                                {dbUser?.name?.charAt(0) || 'U'}
-                            </div>
+                            <UserAvatar src={dbUser?.avatarUrl} name={dbUser?.name} size={44} />
                             <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-white" />
                         </div>
                         <div className="hidden sm:block">
@@ -173,6 +197,11 @@ export default function Dashboard() {
                         <button onClick={() => router.push('/classes')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-sm font-bold transition-all">
                             <Calendar size={15} /> Aulas
                         </button>
+                        {dbUser?.role === 'admin' && (
+                            <button onClick={() => router.push('/admin')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold transition-all shadow-sm">
+                                <Shield size={15} /> Admin
+                            </button>
+                        )}
                         <button onClick={() => router.push('/profile')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold transition-all shadow-sm">
                             <User size={15} /> Perfil
                         </button>
@@ -538,9 +567,18 @@ function TeacherCard({ teacher, daysOfWeek, index, onSchedule, onProfile }: any)
             <div className="p-6 pb-4">
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${avatarGrads[idx]} border border-white shadow-sm flex items-center justify-center flex-shrink-0`}>
-                            <span className="text-xl font-black text-rose-400">{teacher.user?.name?.charAt(0) || '?'}</span>
-                        </div>
+                        {teacher.user?.avatarUrl ? (
+                            <img
+                                src={`${BACKEND_URL}${teacher.user.avatarUrl}`}
+                                alt={teacher.user?.name}
+                                className="w-14 h-14 rounded-2xl object-cover border-2 border-white shadow-sm flex-shrink-0"
+                                onError={(e: any) => { e.target.style.display = 'none'; }}
+                            />
+                        ) : (
+                            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${avatarGrads[idx]} border border-white shadow-sm flex items-center justify-center flex-shrink-0`}>
+                                <span className="text-xl font-black text-rose-400">{teacher.user?.name?.charAt(0) || '?'}</span>
+                            </div>
+                        )}
                         <div className="min-w-0">
                             <h3 className="font-extrabold text-base text-slate-800 truncate">{teacher.user?.name || 'Professor(a)'}</h3>
                             <p className="text-xs text-slate-500 truncate mt-0.5">{teacher.training || 'Diversas Matérias'}</p>

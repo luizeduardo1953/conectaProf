@@ -18,7 +18,11 @@ import {
     GraduationCap,
     Phone,
     ChevronRight,
+    Camera,
+    Shield,
 } from 'lucide-react';
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_URL_BACKEND ?? '';
 
 export default function Profile() {
     const router = useRouter();
@@ -44,7 +48,7 @@ export default function Profile() {
     const [successMsg, setSuccessMsg] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
 
-    const url = process.env.NEXT_PUBLIC_URL_BACKEND;
+    const url = BACKEND_URL;
     const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
     const showSuccess = (msg: string) => {
@@ -56,6 +60,31 @@ export default function Profile() {
     const showError = (msg: string) => {
         setErrorMsg(msg);
         setTimeout(() => setErrorMsg(''), 4000);
+    };
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !user) return;
+        const token = localStorage.getItem('token');
+        const form = new FormData();
+        form.append('file', file);
+        try {
+            const res = await fetch(`${url}/upload/avatar/${user.id}`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: form,
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUser((prev: any) => ({ ...prev, avatarUrl: data.avatarUrl }));
+                showSuccess('Foto de perfil atualizada!');
+            } else {
+                const err = await res.json().catch(() => ({}));
+                showError(err?.message || 'Erro ao enviar foto.');
+            }
+        } catch {
+            showError('Erro de conexão.');
+        }
     };
 
     useEffect(() => {
@@ -301,9 +330,29 @@ export default function Profile() {
                         {/* Profile Summary Card */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center">
                             <div className="relative inline-block mb-4">
-                                <div className="w-24 h-24 rounded-full bg-slate-100 border-4 border-white shadow-md mx-auto flex items-center justify-center overflow-hidden">
-                                    <UserIcon size={40} className="text-slate-300" />
+                                <div className="w-24 h-24 rounded-full border-4 border-white shadow-md mx-auto overflow-hidden bg-slate-100 flex items-center justify-center">
+                                    {user?.avatarUrl ? (
+                                        <img
+                                            src={`${BACKEND_URL}${user.avatarUrl}`}
+                                            alt={user.name}
+                                            className="w-full h-full object-cover"
+                                            onError={(e: any) => { e.target.style.display = 'none'; }}
+                                        />
+                                    ) : (
+                                        <UserIcon size={40} className="text-slate-300" />
+                                    )}
                                 </div>
+                                {/* Upload button */}
+                                <label htmlFor="avatar-upload" className="absolute bottom-0 right-0 w-8 h-8 bg-rose-500 hover:bg-rose-600 rounded-full border-2 border-white flex items-center justify-center cursor-pointer shadow-md transition-all" title="Alterar foto">
+                                    <Camera size={14} className="text-white" />
+                                    <input
+                                        id="avatar-upload"
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        className="hidden"
+                                        onChange={handleAvatarUpload}
+                                    />
+                                </label>
                             </div>
 
                             <h2 className="text-xl font-bold text-slate-900 mb-1">{user?.name || 'Usuário'}</h2>
@@ -311,12 +360,24 @@ export default function Profile() {
                                 <Mail size={14} /> {user?.email}
                             </p>
 
-                            <span className={`px-3 py-1 text-xs font-bold rounded-full border ${isTeacher
+                            <span className={`px-3 py-1 text-xs font-bold rounded-full border ${
+                                user?.role === 'admin'
+                                ? 'bg-purple-50 text-purple-600 border-purple-100'
+                                : isTeacher
                                 ? 'bg-green-50 text-green-600 border-green-100'
                                 : 'bg-blue-50 text-blue-600 border-blue-100'
-                                }`}>
-                                {isTeacher ? 'Professor(a)' : 'Estudante'}
+                            }`}>
+                                {user?.role === 'admin' ? 'Administrador' : isTeacher ? 'Professor(a)' : 'Estudante'}
                             </span>
+
+                            {user?.role === 'admin' && (
+                                <button
+                                    onClick={() => router.push('/admin')}
+                                    className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-700 px-4 py-2.5 text-white text-sm font-bold transition-all"
+                                >
+                                    <Shield size={15} /> Painel Administrativo
+                                </button>
+                            )}
                         </div>
 
                         {/* Navigation Menu */}

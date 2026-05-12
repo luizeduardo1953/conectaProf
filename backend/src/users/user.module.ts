@@ -20,6 +20,6 @@ import { GetUserByEmail } from './application/use-cases/GetUserByEmail';
     GetUsers,
     GetUserByEmail,
   ],
-  exports: [UserPrismaRepository],
+  exports: [UserPrismaRepository, UpdateUser, DeleteUser, GetUserById, GetUsers],
 })
 export class UserModule {}

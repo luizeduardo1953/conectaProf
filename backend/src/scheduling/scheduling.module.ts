@@ -7,5 +7,6 @@ import { SchedulingPrismaRepository } from './infra/database/SchedulingPrismaRep
     imports: [PrismaModule],
     controllers: [SchedulingController],
     providers: [SchedulingPrismaRepository],
+    exports: [SchedulingPrismaRepository],
 })
 export class SchedulingModule { }
